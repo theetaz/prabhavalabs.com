@@ -4,6 +4,7 @@ tagline: 'Learn from any English YouTube video — in Sinhala'
 description: 'A mobile-first, installable PWA that overlays frame-accurate, LLM-translated Sinhala subtitles on YouTube videos — plus an AI chat assistant grounded in everything you have watched.'
 tags: ['TypeScript', 'PWA', 'LLM', 'Self-hosted']
 repo: 'https://github.com/prabhavalabs/vidura'
+link: 'https://vidura.prabhavalabs.com'
 status: 'active'
 featured: true
 order: 1
