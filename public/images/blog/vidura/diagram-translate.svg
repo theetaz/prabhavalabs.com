@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 400" font-family="ui-sans-serif, system-ui, sans-serif">
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#a78bfa"/>
+    </marker>
+  </defs>
+  <rect width="920" height="400" fill="#050508"/>
+
+  <text x="30" y="40" fill="#ffffff" font-size="19" font-weight="600">Translating the whole transcript in one call</text>
+
+  <!-- naive path -->
+  <text x="30" y="86" fill="#f87171" fill-opacity="0.9" font-size="14">The word-salad way</text>
+  <rect x="30" y="100" width="190" height="58" rx="12" fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1.4"/>
+  <text x="125" y="126" fill="#ffffff" fill-opacity="0.8" font-size="13.5" text-anchor="middle">caption line 1</text>
+  <text x="125" y="145" fill="#ffffff" fill-opacity="0.45" font-size="12">translated alone</text>
+  <rect x="250" y="100" width="190" height="58" rx="12" fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-width="1.4"/>
+  <text x="345" y="126" fill="#ffffff" fill-opacity="0.8" font-size="13.5" text-anchor="middle">caption line 2</text>
+  <text x="345" y="145" fill="#ffffff" fill-opacity="0.45" font-size="12">translated alone</text>
+  <text x="482" y="133" fill="#ffffff" fill-opacity="0.5" font-size="14">…</text>
+  <text x="530" y="133" fill="#f87171" fill-opacity="0.9" font-size="13.5">= terms drift, sentences break mid-thought</text>
+
+  <!-- vidura path -->
+  <text x="30" y="216" fill="#6ee7b7" font-size="14">The Vidura way</text>
+  <rect x="30" y="232" width="220" height="78" rx="14" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="1.5"/>
+  <text x="140" y="262" fill="#ffffff" font-size="15" text-anchor="middle">entire caption track</text>
+  <text x="140" y="284" fill="#ffffff" fill-opacity="0.45" font-size="12.5" text-anchor="middle">plus title and description</text>
+
+  <path d="M 250 271 L 330 271" fill="none" stroke="#a78bfa" stroke-width="1.8" marker-end="url(#arrow2)"/>
+
+  <rect x="340" y="225" width="260" height="92" rx="14" fill="none" stroke="#a78bfa" stroke-opacity="0.85" stroke-width="1.6"/>
+  <text x="470" y="255" fill="#ffffff" font-size="15" text-anchor="middle">one structured-output call</text>
+  <text x="470" y="277" fill="#ffffff" fill-opacity="0.5" font-size="12.5" text-anchor="middle">DeepSeek or GPT via OpenRouter</text>
+  <text x="470" y="297" fill="#ffffff" fill-opacity="0.5" font-size="12.5" text-anchor="middle">immutable core prompt + alignment gate</text>
+
+  <path d="M 600 271 L 680 271" fill="none" stroke="#a78bfa" stroke-width="1.8" marker-end="url(#arrow2)"/>
+
+  <rect x="690" y="232" width="200" height="78" rx="14" fill="none" stroke="#6ee7b7" stroke-opacity="0.7" stroke-width="1.5"/>
+  <text x="790" y="262" fill="#ffffff" font-size="15" text-anchor="middle">සිංහල subtitle lines</text>
+  <text x="790" y="284" fill="#ffffff" fill-opacity="0.45" font-size="12.5" text-anchor="middle">consistent terms, real sentences</text>
+
+  <text x="30" y="366" fill="#ffffff" fill-opacity="0.55" font-size="13">The model sees the whole lecture at once, so "function" stays the same word in minute 2 and minute 40.</text>
+</svg>

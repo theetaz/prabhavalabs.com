@@ -5,9 +5,11 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import Starfield from '../../components/Starfield';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
-);
+// The index lists English posts; Sinhala versions are reached through the
+// language switcher on each post.
+const posts = (
+  await getCollection('blog', ({ data }) => !data.draft && data.lang === 'en')
+).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const fmt = (date: Date) =>
   date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });

@@ -1,0 +1,6 @@
+{
+  "name": "vidura-api-proxy",
+  "main": "worker.js",
+  "compatibility_date": "2026-07-01",
+  "routes": [{ "pattern": "vidura-api.prabhavalabs.com", "custom_domain": true }]
+}

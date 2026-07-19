@@ -1,5 +1,5 @@
 {
-  "name": "vidura-redirect",
+  "name": "vidura-frontend",
   "main": "worker.js",
   "compatibility_date": "2026-07-01",
   "routes": [{ "pattern": "vidura.prabhavalabs.com", "custom_domain": true }]

@@ -15,7 +15,17 @@ const { post } = Astro.props;
 const { Content } = await render(post);
 const d = post.data;
 
-const fmt = d.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+// Find this post's counterpart in the other language (linked either way).
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const translation = allPosts.find(
+  (p) => p.data.translationOf === post.id || p.id === d.translationOf
+);
+
+const fmt = d.date.toLocaleDateString(d.lang === 'si' ? 'si-LK' : 'en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
 ---
 
 <Layout title={`${d.title} — ප්‍රභව Labs`} description={d.description}>
@@ -40,6 +50,20 @@ const fmt = d.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long',
         {d.tags.map((t) => (
           <span class="rounded-full border border-white/10 px-3 py-1 text-xs text-white/40">{t}</span>
         ))}
+        {translation && (
+          <span class="liquid-glass flex items-center gap-1 rounded-full p-1 text-xs">
+            <span
+              class={`rounded-full px-3 py-1 ${d.lang === 'en' ? 'bg-white text-black' : 'text-white/60'}`}
+            >
+              {d.lang === 'en' ? 'English' : <a href={`/blog/${translation.id}`}>English</a>}
+            </span>
+            <span
+              class={`font-sinhala rounded-full px-3 py-1 ${d.lang === 'si' ? 'bg-white text-black' : 'text-white/60'}`}
+            >
+              {d.lang === 'si' ? 'සිංහල' : <a href={`/blog/${translation.id}`}>සිංහල</a>}
+            </span>
+          </span>
+        )}
       </div>
 
       <h1 class="font-serif-display text-4xl leading-[1.1] tracking-tight text-white md:text-6xl">

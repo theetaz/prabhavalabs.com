@@ -25,6 +25,9 @@ const blog = defineCollection({
     date: z.coerce.date(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    lang: z.enum(['en', 'si']).default('en'),
+    // Slug of the same post in the other language, if one exists.
+    translationOf: z.string().optional(),
   }),
 });
 
