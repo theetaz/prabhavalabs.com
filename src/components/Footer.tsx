@@ -117,7 +117,7 @@ export default function Footer() {
         >
           {[
             { icon: Github, href: 'https://github.com/prabhavalabs', label: 'GitHub' },
-            { icon: Twitter, href: 'https://x.com', label: 'Twitter / X' },
+            { icon: Twitter, href: 'https://x.com/PravhavaLabs', label: 'X (Twitter)' },
             { icon: Globe, href: 'https://prabhavalabs.com', label: 'Website' },
           ].map(({ icon: Icon, href, label }) => (
             <a
