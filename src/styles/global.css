@@ -82,6 +82,14 @@ body {
     font-family: 'Noto Serif Sinhala', 'Instrument Serif', serif;
   }
 
+  /* Hide scrollbars on carousel tracks while keeping them scrollable. */
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Origin-mark ripple: rings pulse outward and fade like water ripples. */
   .logo-ripple {
     animation: logo-ripple 3.2s cubic-bezier(0, 0, 0.25, 1) infinite;

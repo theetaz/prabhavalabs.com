@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/open-pay'
 status: 'active'
 featured: false
 order: 9
+image: '/images/projects/open-pay.jpg'
 ---
 
 ## The itch

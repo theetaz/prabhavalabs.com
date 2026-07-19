@@ -8,6 +8,7 @@ link: 'https://vidura.prabhavalabs.com'
 status: 'active'
 featured: true
 order: 1
+image: '/images/projects/vidura.jpg'
 ---
 
 ## The itch

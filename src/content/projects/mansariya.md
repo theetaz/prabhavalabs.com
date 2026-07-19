@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/mansariya'
 status: 'active'
 featured: false
 order: 10
+image: '/images/projects/mansariya.jpg'
 ---
 
 ## The itch

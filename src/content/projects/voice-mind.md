@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/voice-mind'
 status: 'incubating'
 featured: false
 order: 8
+image: '/images/projects/voice-mind.jpg'
 ---
 
 ## The itch

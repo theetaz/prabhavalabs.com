@@ -1,0 +1,100 @@
+import { useCallback, useRef, useState } from 'react';
+import { motion, useInView } from 'motion/react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { Card, type ProjectCard } from './ProjectsGrid';
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+/**
+ * Horizontal project carousel for the landing page: native scroll with snap
+ * points (so touch and trackpads feel right), arrow buttons, and edge fades.
+ * The /projects page keeps the full grid.
+ */
+export default function ProjectsCarousel({ projects }: { projects: ProjectCard[] }) {
+  const headRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(headRef, { once: true, margin: '-100px' });
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+
+  const onScroll = useCallback(() => {
+    const el = trackRef.current;
+    if (!el) return;
+    setAtStart(el.scrollLeft < 24);
+    setAtEnd(el.scrollLeft > el.scrollWidth - el.clientWidth - 24);
+  }, []);
+
+  const scrollBy = (dir: 1 | -1) => {
+    const el = trackRef.current;
+    if (!el) return;
+    const card = el.querySelector('[data-card]') as HTMLElement | null;
+    const step = card ? card.offsetWidth + 24 : 400;
+    el.scrollBy({ left: dir * step, behavior: 'smooth' });
+  };
+
+  return (
+    <section id="projects" className="relative overflow-hidden bg-black py-24 md:py-36">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(255,255,255,0.02)_0%,_transparent_60%)]" />
+
+      <div className="relative">
+        <motion.div
+          ref={headRef}
+          initial={{ opacity: 0, y: 30 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, ease: EASE }}
+          className="mx-auto mb-12 flex max-w-6xl items-end justify-between px-6 md:mb-16"
+        >
+          <h2 className="font-serif-display text-3xl tracking-tight text-white md:text-5xl">
+            The <em className="italic text-white/60">open</em> shelf
+          </h2>
+          <div className="flex items-center gap-3">
+            <a
+              href="/projects"
+              className="mr-2 hidden text-sm text-white/40 transition-colors hover:text-white md:block"
+            >
+              All {projects.length} projects →
+            </a>
+            <button
+              type="button"
+              aria-label="Previous projects"
+              onClick={() => scrollBy(-1)}
+              disabled={atStart}
+              className="liquid-glass rounded-full p-3 text-white/70 transition-all hover:bg-white/5 hover:text-white disabled:opacity-30"
+            >
+              <ArrowLeft size={16} />
+            </button>
+            <button
+              type="button"
+              aria-label="Next projects"
+              onClick={() => scrollBy(1)}
+              disabled={atEnd}
+              className="liquid-glass rounded-full p-3 text-white/70 transition-all hover:bg-white/5 hover:text-white disabled:opacity-30"
+            >
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Edge fades */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-black to-transparent md:w-20" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-black to-transparent md:w-20" />
+
+        <div
+          ref={trackRef}
+          onScroll={onScroll}
+          className="scrollbar-none flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-6 pb-4 md:px-[max(1.5rem,calc((100vw-72rem)/2))]"
+        >
+          {projects.map((p, i) => (
+            <div
+              key={p.id}
+              data-card
+              className="w-[85vw] max-w-sm shrink-0 snap-start sm:w-[380px]"
+            >
+              <Card project={p} index={i} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

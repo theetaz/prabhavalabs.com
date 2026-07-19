@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/MendLog'
 status: 'incubating'
 featured: false
 order: 13
+image: '/images/projects/mendlog.jpg'
 ---
 
 ## The itch

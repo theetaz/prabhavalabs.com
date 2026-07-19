@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/opentreasury'
 status: 'active'
 featured: false
 order: 2
+image: '/images/projects/opentreasury.jpg'
 ---
 
 ## The itch

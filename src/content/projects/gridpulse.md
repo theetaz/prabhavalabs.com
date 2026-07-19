@@ -8,6 +8,7 @@ link: 'https://gridpulse-cyr.pages.dev'
 status: 'active'
 featured: false
 order: 3
+image: '/images/projects/gridpulse.jpg'
 ---
 
 ## The itch

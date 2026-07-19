@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/goyama'
 status: 'incubating'
 featured: false
 order: 5
+image: '/images/projects/goyama.jpg'
 ---
 
 ## The itch

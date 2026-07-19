@@ -12,15 +12,16 @@ export type ProjectCard = {
   tags: string[];
   repo?: string;
   status: 'active' | 'incubating' | 'archived';
+  image?: string;
 };
 
-const statusStyle: Record<ProjectCard['status'], string> = {
+export const statusStyle: Record<ProjectCard['status'], string> = {
   active: 'text-emerald-300/80 border-emerald-300/20',
   incubating: 'text-amber-300/80 border-amber-300/20',
   archived: 'text-white/40 border-white/10',
 };
 
-function Card({ project, index }: { project: ProjectCard; index: number }) {
+export function Card({ project, index }: { project: ProjectCard; index: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -39,7 +40,7 @@ function Card({ project, index }: { project: ProjectCard; index: number }) {
       />
       <div className="relative aspect-video overflow-hidden">
         <img
-          src={`/images/card-${(index % 3) + 1}.jpg`}
+          src={project.image ?? `/images/card-${(index % 3) + 1}.jpg`}
           alt=""
           loading="lazy"
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"

@@ -8,6 +8,7 @@ link: 'https://ceylon-hub.pages.dev'
 status: 'incubating'
 featured: false
 order: 11
+image: '/images/projects/ceylon-hub.jpg'
 ---
 
 ## The itch

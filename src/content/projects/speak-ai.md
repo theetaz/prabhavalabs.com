@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/speak-ai'
 status: 'incubating'
 featured: false
 order: 7
+image: '/images/projects/speak-ai.jpg'
 ---
 
 ## The itch

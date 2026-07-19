@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import About from '../components/About';
 import Showcase from '../components/Showcase';
-import ProjectsGrid from '../components/ProjectsGrid';
+import ProjectsCarousel from '../components/ProjectsCarousel';
 import Philosophy from '../components/Philosophy';
 import Footer from '../components/Footer';
 
@@ -23,6 +23,7 @@ const cards = all.map((p) => ({
   tags: p.data.tags,
   repo: p.data.repo,
   status: p.data.status,
+  image: p.data.image,
 }));
 ---
 
@@ -31,7 +32,7 @@ const cards = all.map((p) => ({
   <Hero client:load />
   <About client:visible />
   <Showcase client:visible project={featured} />
-  <ProjectsGrid client:visible projects={cards} />
+  <ProjectsCarousel client:visible projects={cards} />
   <Philosophy client:visible />
   <Footer client:visible />
 </Layout>

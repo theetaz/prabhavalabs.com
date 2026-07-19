@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/lang-stream-ai-agent'
 status: 'archived'
 featured: false
 order: 12
+image: '/images/projects/lang-stream-ai-agent.jpg'
 ---
 
 ## The itch

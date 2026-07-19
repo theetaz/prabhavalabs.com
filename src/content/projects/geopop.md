@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/geopop'
 status: 'active'
 featured: false
 order: 4
+image: '/images/projects/geopop.jpg'
 ---
 
 ## The itch

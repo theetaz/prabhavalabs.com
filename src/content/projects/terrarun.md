@@ -7,6 +7,7 @@ repo: 'https://github.com/prabhavalabs/terrarun'
 status: 'incubating'
 featured: false
 order: 6
+image: '/images/projects/terrarun.jpg'
 ---
 
 ## The itch
