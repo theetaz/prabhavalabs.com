@@ -21,16 +21,25 @@ export const statusStyle: Record<ProjectCard['status'], string> = {
   archived: 'text-white/40 border-white/10',
 };
 
-export function Card({ project, index }: { project: ProjectCard; index: number }) {
+export function Card({
+  project,
+  index,
+  instant = false,
+}: {
+  project: ProjectCard;
+  index: number;
+  /** Skip scroll-reveal and lazy loading — needed inside horizontal carousels. */
+  instant?: boolean;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8, ease: EASE, delay: (index % 3) * 0.12 }}
+      initial={instant ? false : { opacity: 0, y: 50 }}
+      animate={instant || inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.8, ease: EASE, delay: instant ? 0 : (index % 3) * 0.12 }}
       className="liquid-glass group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl transition-colors hover:bg-white/[0.03]"
     >
       <a
@@ -42,7 +51,8 @@ export function Card({ project, index }: { project: ProjectCard; index: number }
         <img
           src={project.image ?? `/images/card-${(index % 3) + 1}.jpg`}
           alt=""
-          loading="lazy"
+          loading={instant ? 'eager' : 'lazy'}
+          decoding="async"
           className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

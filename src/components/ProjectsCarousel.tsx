@@ -137,7 +137,7 @@ export default function ProjectsCarousel({ projects }: { projects: ProjectCard[]
               data-card
               className="flex w-[85vw] max-w-sm shrink-0 snap-start sm:w-[380px]"
             >
-              <Card project={p} index={i} />
+              <Card project={p} index={i} instant />
             </div>
           ))}
         </div>
