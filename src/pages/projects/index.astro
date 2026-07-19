@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar';
+import ProjectsGrid from '../../components/ProjectsGrid';
+import Footer from '../../components/Footer';
+import Starfield from '../../components/Starfield';
+
+const all = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+
+const cards = all.map((p) => ({
+  id: p.id,
+  title: p.data.title,
+  tagline: p.data.tagline,
+  description: p.data.description,
+  tags: p.data.tags,
+  repo: p.data.repo,
+  status: p.data.status,
+}));
+---
+
+<Layout
+  title="Projects — ප්‍රභව Labs"
+  description="Every open-source project from Prabhava Labs — active, incubating, and archived."
+>
+  <Navbar client:load currentPath="/projects" />
+
+  <header class="relative overflow-hidden px-6 pb-6 pt-44 md:pt-52">
+    <Starfield client:load density={130} />
+    <div
+      class="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(124,111,212,0.1)_0%,_transparent_65%)]"
+    >
+    </div>
+    <div class="relative mx-auto max-w-6xl">
+      <p class="mb-6 text-xs font-medium uppercase tracking-[0.35em] text-white/40">The open shelf</p>
+      <h1 class="font-serif-display max-w-3xl text-5xl leading-[1.05] tracking-tight text-white md:text-7xl">
+        Projects, shipped <em class="italic text-white/60">in the open.</em>
+      </h1>
+      <p class="mt-6 max-w-xl text-sm leading-relaxed text-white/50 md:text-base">
+        Everything here is open source — the finished tools, the experiments still finding their
+        shape, and the archives that taught us something.
+      </p>
+    </div>
+  </header>
+
+  <ProjectsGrid client:visible projects={cards} standalone />
+  <Footer client:visible />
+</Layout>
