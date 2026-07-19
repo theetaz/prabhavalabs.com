@@ -1,5 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="14" fill="#000"/>
-  <text x="32" y="43" font-family="Georgia, serif" font-style="italic" font-size="34" fill="#fff" text-anchor="middle">P</text>
-  <circle cx="47" cy="18" r="4" fill="#fff" opacity="0.85"/>
+  <circle cx="32" cy="32" r="4.5" fill="#FFFFFF"/>
+  <circle cx="32" cy="32" r="12" stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="2.2" fill="none"/>
+  <circle cx="32" cy="32" r="19" stroke="#A78BFA" stroke-opacity="0.55" stroke-width="1.8" fill="none"/>
+  <circle cx="32" cy="32" r="26" stroke="#A78BFA" stroke-opacity="0.25" stroke-width="1.4" fill="none"/>
 </svg>

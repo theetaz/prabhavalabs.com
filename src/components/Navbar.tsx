@@ -19,9 +19,17 @@ export default function Navbar({ currentPath = '/' }: { currentPath?: string }) 
       className="fixed inset-x-0 top-0 z-50 px-4 py-4 md:px-6 md:py-6"
     >
       <div className="liquid-glass mx-auto flex max-w-5xl items-center justify-between rounded-full bg-black/55 px-5 py-3 backdrop-blur-2xl md:px-6">
-        <a href="/" className="flex items-baseline gap-2">
-          <span className="font-sinhala text-lg leading-none text-white">ප්‍රභව</span>
-          <span className="font-serif-display text-lg italic leading-none text-white/90">Labs</span>
+        <a href="/" className="flex items-center gap-2.5">
+          {/* Animated origin mark: rings ripple outward and fade. */}
+          <span aria-hidden="true" className="relative flex h-7 w-7 items-center justify-center">
+            <span className="h-[7px] w-[7px] rounded-full bg-white" />
+            <span className="logo-ripple absolute inset-0 rounded-full border-[1.5px] border-white/80" />
+            <span className="logo-ripple logo-ripple-delayed absolute inset-0 rounded-full border border-violet-300/70" />
+          </span>
+          <span className="flex items-baseline gap-2">
+            <span className="font-sinhala text-lg leading-none text-white">ප්‍රභව</span>
+            <span className="font-serif-display text-lg italic leading-none text-white/90">Labs</span>
+          </span>
         </a>
 
         <div className="hidden items-center gap-8 md:flex">

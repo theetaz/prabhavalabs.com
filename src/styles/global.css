@@ -82,6 +82,34 @@ body {
     font-family: 'Noto Serif Sinhala', 'Instrument Serif', serif;
   }
 
+  /* Origin-mark ripple: rings pulse outward and fade like water ripples. */
+  .logo-ripple {
+    animation: logo-ripple 3.2s cubic-bezier(0, 0, 0.25, 1) infinite;
+  }
+  .logo-ripple-delayed {
+    animation-delay: 1.6s;
+  }
+  @keyframes logo-ripple {
+    0% {
+      transform: scale(0.3);
+      opacity: 0.9;
+    }
+    70% {
+      opacity: 0.3;
+    }
+    100% {
+      transform: scale(1.45);
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logo-ripple {
+      animation: none;
+      transform: scale(0.75);
+      opacity: 0.5;
+    }
+  }
+
   /* Long-form article styling for project stories & blog posts. */
   .prose-dark {
     color: rgba(255, 255, 255, 0.68);
