@@ -1,0 +1,36 @@
+# dependencies / build
+node_modules/
+dist/
+.astro/
+.wrangler/
+
+# local assets not deployed
+archive/
+
+# env & secrets
+.env
+*.env
+.env.bak*
+
+# macOS / editor
+.DS_Store
+.idea
+.vscode
+*.log
+logs/
+
+# AI generated files — never commit assistant workspace or config
+CLAUDE.md
+AGENTS.md
+.claude/
+.claude.md
+.cursor/
+.cursorrules
+.codex/
+.agent/
+.agents/
+.skills/
+.superpowers/
+.windsurf/
+.playwright-mcp/
+.playwright-cli/
