@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- ප්‍රභව Labs origin mark: a point of origin radiating outward -->
+  <circle cx="60" cy="60" r="7" fill="#FFFFFF"/>
+  <circle cx="60" cy="60" r="24" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="2.5"/>
+  <circle cx="60" cy="60" r="40" stroke="#A78BFA" stroke-opacity="0.5" stroke-width="2"/>
+  <circle cx="60" cy="60" r="55" stroke="#A78BFA" stroke-opacity="0.22" stroke-width="1.5"/>
+</svg>

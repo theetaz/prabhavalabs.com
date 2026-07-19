@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 140" fill="none">
+  <!-- ප්‍රභව Labs wordmark. Requires network access to Google Fonts when
+       rendered standalone; use prabhava-wordmark.png for offline contexts. -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&amp;family=Noto+Serif+Sinhala:wght@500&amp;display=swap');
+    .si { font-family: 'Noto Serif Sinhala', serif; font-weight: 500; }
+    .la { font-family: 'Instrument Serif', serif; font-style: italic; }
+  </style>
+  <circle cx="52" cy="72" r="5" fill="#FFFFFF"/>
+  <circle cx="52" cy="72" r="17" stroke="#FFFFFF" stroke-opacity="0.8" stroke-width="2"/>
+  <circle cx="52" cy="72" r="28" stroke="#A78BFA" stroke-opacity="0.4" stroke-width="1.5"/>
+  <text x="104" y="92" class="si" font-size="56" fill="#FFFFFF">ප්‍රභව</text>
+  <text x="296" y="92" class="la" font-size="60" fill="#FFFFFF" fill-opacity="0.85">Labs</text>
+</svg>
