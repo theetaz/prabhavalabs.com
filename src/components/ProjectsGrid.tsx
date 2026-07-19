@@ -31,7 +31,7 @@ export function Card({ project, index }: { project: ProjectCard; index: number }
       initial={{ opacity: 0, y: 50 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.8, ease: EASE, delay: (index % 3) * 0.12 }}
-      className="liquid-glass group relative flex flex-col justify-between overflow-hidden rounded-3xl transition-colors hover:bg-white/[0.03]"
+      className="liquid-glass group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl transition-colors hover:bg-white/[0.03]"
     >
       <a
         href={`/projects/${project.id}`}

@@ -17,6 +17,48 @@ export default function ProjectsCarousel({ projects }: { projects: ProjectCard[]
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
+  // Mouse drag-to-scroll. Touch devices scroll the track natively; this
+  // covers desktop pointers, with click suppression after a real drag and
+  // snap paused while dragging so it doesn't fight the pointer.
+  const drag = useRef({ down: false, startX: 0, startLeft: 0, moved: false });
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (e.pointerType !== 'mouse') return;
+    const el = trackRef.current;
+    if (!el) return;
+    // Stop native link/image dragging from hijacking the gesture, and keep
+    // receiving moves even when the pointer crosses child elements.
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    drag.current = { down: true, startX: e.clientX, startLeft: el.scrollLeft, moved: false };
+    el.style.scrollBehavior = 'auto';
+    el.style.scrollSnapType = 'none';
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    const el = trackRef.current;
+    if (!el || !drag.current.down) return;
+    const dx = e.clientX - drag.current.startX;
+    if (Math.abs(dx) > 4) drag.current.moved = true;
+    el.scrollLeft = drag.current.startLeft - dx;
+  };
+
+  const endDrag = () => {
+    const el = trackRef.current;
+    if (!el || !drag.current.down) return;
+    drag.current.down = false;
+    el.style.scrollBehavior = '';
+    el.style.scrollSnapType = '';
+  };
+
+  const onClickCapture = (e: React.MouseEvent) => {
+    if (drag.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+      drag.current.moved = false;
+    }
+  };
+
   const onScroll = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
@@ -82,13 +124,18 @@ export default function ProjectsCarousel({ projects }: { projects: ProjectCard[]
         <div
           ref={trackRef}
           onScroll={onScroll}
-          className="scrollbar-none flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth px-6 pb-4 md:px-[max(1.5rem,calc((100vw-72rem)/2))]"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={endDrag}
+          onPointerLeave={endDrag}
+          onClickCapture={onClickCapture}
+          className="scrollbar-none flex cursor-grab select-none snap-x snap-mandatory items-stretch gap-6 overflow-x-auto px-6 pb-4 active:cursor-grabbing md:px-[max(1.5rem,calc((100vw-72rem)/2))]"
         >
           {projects.map((p, i) => (
             <div
               key={p.id}
               data-card
-              className="w-[85vw] max-w-sm shrink-0 snap-start sm:w-[380px]"
+              className="flex w-[85vw] max-w-sm shrink-0 snap-start sm:w-[380px]"
             >
               <Card project={p} index={i} />
             </div>
