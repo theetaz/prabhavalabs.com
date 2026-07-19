@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { motion, useInView, useScroll, useTransform } from 'motion/react';
 
-const ConstellationField = lazy(() => import('./ConstellationField'));
+const OriginGalaxy = lazy(() => import('./OriginGalaxy'));
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -55,7 +55,7 @@ export default function Philosophy() {
             <motion.div style={{ y: videoY }} className="absolute -inset-y-10 inset-x-0">
               {mounted && (
                 <Suspense fallback={null}>
-                  <ConstellationField />
+                  <OriginGalaxy />
                 </Suspense>
               )}
             </motion.div>

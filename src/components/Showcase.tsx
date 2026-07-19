@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { motion, useInView, useScroll, useTransform } from 'motion/react';
+import { motion, useInView } from 'motion/react';
 import { ArrowUpRight } from 'lucide-react';
 
 const ParticleWave = lazy(() => import('./ParticleWave'));
@@ -15,43 +15,38 @@ export type ShowcaseProject = {
 };
 
 export default function Showcase({ project }: { project: ShowcaseProject | null }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: '-100px' });
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Scroll-linked zoom-in: the frame grows from 92% to full size as it
-  // enters, while the video inside starts overscanned and settles.
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start end', 'center center'],
-  });
-  const frameScale = useTransform(scrollYProgress, [0, 1], [0.92, 1]);
-  const videoScale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
-
   if (!project) return null;
 
   return (
-    <section className="overflow-hidden bg-black px-6 pb-24 pt-6 md:pb-36 md:pt-10">
-      <motion.div
-        ref={ref}
-        style={{ scale: frameScale }}
-        initial={{ opacity: 0, y: 60 }}
-        animate={inView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.9, ease: EASE }}
-        className="relative mx-auto aspect-[4/5] max-w-6xl overflow-hidden rounded-3xl sm:aspect-video"
-      >
-        <motion.div style={{ scale: videoScale }} className="absolute inset-0">
-          {mounted && (
-            <Suspense fallback={null}>
-              <ParticleWave />
-            </Suspense>
-          )}
-        </motion.div>
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+    <section
+      ref={ref}
+      className="relative flex min-h-[85vh] flex-col justify-end overflow-hidden bg-black"
+    >
+      {/* Full-bleed interactive particle terrain. */}
+      <div className="absolute inset-0">
+        {mounted && (
+          <Suspense fallback={null}>
+            <ParticleWave />
+          </Suspense>
+        )}
+      </div>
+      {/* Blend edges into the surrounding black sections. */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black via-black/40 to-transparent" />
 
-        <div className="absolute inset-x-0 bottom-0 flex flex-col items-start justify-between gap-6 p-6 md:flex-row md:items-end md:p-10">
-          <div className="liquid-glass max-w-md rounded-2xl p-6 md:p-8">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-16 md:pb-24">
+        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.9, ease: EASE }}
+            className="liquid-glass max-w-md rounded-2xl bg-black/30 p-6 backdrop-blur-md md:p-8"
+          >
             <p className="mb-3 text-xs uppercase tracking-widest text-white/50">
               Featured project
             </p>
@@ -71,22 +66,25 @@ export default function Showcase({ project }: { project: ShowcaseProject | null 
                 </span>
               ))}
             </div>
-          </div>
+          </motion.div>
 
           {project.repo && (
             <motion.a
+              initial={{ opacity: 0, y: 30 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.9, ease: EASE, delay: 0.15 }}
               href={project.repo}
               target="_blank"
               rel="noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="liquid-glass flex items-center gap-2 rounded-full px-8 py-3 text-sm font-medium text-white"
+              className="liquid-glass flex items-center gap-2 rounded-full bg-black/30 px-8 py-3 text-sm font-medium text-white backdrop-blur-md"
             >
               View source <ArrowUpRight size={16} />
             </motion.a>
           )}
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

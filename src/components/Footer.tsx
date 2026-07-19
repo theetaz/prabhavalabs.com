@@ -74,9 +74,14 @@ export default function Footer() {
         </motion.div>
 
         <div className="mt-16 flex flex-col items-center gap-2 border-t border-white/10 pt-8 text-xs text-white/30 md:flex-row md:justify-between">
-          <p>
-            <span className="font-sinhala text-white/50">ප්‍රභව</span> Labs — where ideas take
-            origin.
+          <p className="flex items-center gap-4">
+            <span>
+              <span className="font-sinhala text-white/50">ප්‍රභව</span> Labs — where ideas take
+              origin.
+            </span>
+            <a href="/brand" className="text-white/40 underline-offset-2 transition-colors hover:text-white">
+              Brand
+            </a>
           </p>
           <p>© {new Date().getFullYear()} Prabhava Labs. Open source, always.</p>
         </div>
