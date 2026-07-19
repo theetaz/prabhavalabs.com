@@ -22,6 +22,36 @@ const downloads = [
   { label: 'Wordmark PNG — transparent', href: '/brand/prabhava-wordmark.png' },
   { label: 'Wordmark PNG — on black', href: '/brand/prabhava-wordmark-black.png' },
 ];
+
+const socialAssets = [
+  { label: 'Profile avatar — 1024×1024', href: '/brand/social/profile-avatar.png', img: '/brand/social/profile-avatar.png' },
+  { label: 'X header — 1500×500', href: '/brand/social/x-header.png', img: '/brand/social/x-header.png' },
+  { label: 'LinkedIn banner — 1584×396', href: '/brand/social/linkedin-banner.png', img: '/brand/social/linkedin-banner.png' },
+  { label: 'Square cover — 1080×1080', href: '/brand/social/square-cover.png', img: '/brand/social/square-cover.png' },
+];
+
+const bios = [
+  {
+    platform: 'X (Twitter)',
+    note: 'Bio, 160 character limit',
+    text: 'Independent open-source studio from Sri Lanka. Every tool ships with its story: Sinhala subtitles for YouTube, outage maps, population APIs. ප්‍රභව = origin.',
+  },
+  {
+    platform: 'LinkedIn',
+    note: 'Tagline + about section',
+    text: 'Independent open-source studio. Built in public from Sri Lanka.\n\nප්‍රභව (prabhava) is the Sanskrit word for origin. Prabhava Labs is where one developer builds open-source tools and publishes the full story behind each one: the problem, the dead ends, and the engineering that finally worked. Current projects include Vidura (Sinhala subtitles for YouTube), GridPulse (crowdsourced power-outage tracking), and GeoPop (a population and geocoding API). All source, all stories: prabhavalabs.com',
+  },
+  {
+    platform: 'Instagram',
+    note: 'Bio, 150 character limit',
+    text: 'ප්‍රභව = where ideas take origin\nOpen-source tools, built in public 🇱🇰\nStories and code below\nprabhavalabs.com',
+  },
+  {
+    platform: 'Handle (all platforms)',
+    note: 'Keep it identical everywhere',
+    text: '@prabhavalabs',
+  },
+];
 ---
 
 <Layout
@@ -136,6 +166,50 @@ const downloads = [
               Body copy, UI labels, and navigation — native system font stack for speed.
             </p>
           </div>
+        </div>
+      </section>
+
+      <!-- Social kit -->
+      <section>
+        <h2 class="font-serif-display mb-8 text-3xl tracking-tight text-white md:text-4xl">
+          Social kit
+        </h2>
+        <p class="mb-8 max-w-2xl text-sm leading-relaxed text-white/50">
+          Ready-to-upload profile and cover images for every major platform, plus the exact bios.
+          Same mark, same palette, same voice everywhere.
+        </p>
+        <div class="grid gap-6 md:grid-cols-2">
+          {socialAssets.map((a) => (
+            <div class="liquid-glass overflow-hidden rounded-3xl">
+              <div class="flex max-h-56 items-center justify-center overflow-hidden bg-black">
+                <img src={a.img} alt={a.label} class="w-full object-contain" />
+              </div>
+              <div class="flex items-center justify-between p-5">
+                <p class="text-sm text-white/70">{a.label}</p>
+                <a
+                  href={a.href}
+                  download
+                  class="liquid-glass flex items-center gap-2 rounded-full px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-white/5"
+                >
+                  <Download size={13} /> Download
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div class="mt-10 grid gap-6 md:grid-cols-2">
+          {bios.map((b) => (
+            <div class="liquid-glass rounded-3xl p-6 md:p-8">
+              <div class="mb-3 flex items-baseline justify-between">
+                <p class="text-sm font-medium text-white">{b.platform}</p>
+                <p class="text-xs text-white/35">{b.note}</p>
+              </div>
+              <p class="whitespace-pre-line text-sm leading-relaxed text-white/60 select-all">
+                {b.text}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 

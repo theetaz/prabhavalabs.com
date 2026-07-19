@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "prabhavalabs",
+  "main": "src/worker/index.js",
   "compatibility_date": "2026-07-01",
   "routes": [
     { "pattern": "prabhavalabs.com", "custom_domain": true },
@@ -8,6 +9,15 @@
   ],
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "prabhavalabs-subscribers",
+      "database_id": "6f545570-bf48-4878-9ec1-7af8b6ff3852"
+    }
+  ],
+  "observability": { "enabled": true }
 }
