@@ -18,7 +18,7 @@ export default function Navbar({ currentPath = '/' }: { currentPath?: string }) 
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
       className="fixed inset-x-0 top-0 z-50 px-4 py-4 md:px-6 md:py-6"
     >
-      <div className="liquid-glass mx-auto flex max-w-5xl items-center justify-between rounded-full px-5 py-3 md:px-6">
+      <div className="liquid-glass mx-auto flex max-w-5xl items-center justify-between rounded-full bg-black/55 px-5 py-3 backdrop-blur-2xl md:px-6">
         <a href="/" className="flex items-baseline gap-2">
           <span className="font-sinhala text-lg leading-none text-white">ප්‍රභව</span>
           <span className="font-serif-display text-lg italic leading-none text-white/90">Labs</span>
