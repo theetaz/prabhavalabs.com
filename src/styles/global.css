@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Noto+Serif+Sinhala:wght@400;500&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-serif: 'Instrument Serif', serif;
+  --font-sinhala: 'Noto Serif Sinhala', 'Instrument Serif', serif;
+}
+
+html {
+  background: #000;
+  color-scheme: dark;
+  scroll-behavior: auto;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.9);
+  color: #000;
+}
+
+/* hide scrollbar chrome, keep function */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #000;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  border: 2px solid #000;
+}
+
+@layer components {
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.01);
+    background-blend-mode: luminosity;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: none;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.45) 0%,
+      rgba(255, 255, 255, 0.15) 20%,
+      rgba(255, 255, 255, 0) 40%,
+      rgba(255, 255, 255, 0) 60%,
+      rgba(255, 255, 255, 0.15) 80%,
+      rgba(255, 255, 255, 0.45) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .font-serif-display {
+    font-family: 'Instrument Serif', serif;
+  }
+
+  .font-sinhala {
+    font-family: 'Noto Serif Sinhala', 'Instrument Serif', serif;
+  }
+
+  /* Long-form article styling for project stories & blog posts. */
+  .prose-dark {
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 1.0625rem;
+    line-height: 1.85;
+  }
+  .prose-dark h2,
+  .prose-dark h3 {
+    font-family: 'Instrument Serif', serif;
+    color: #fff;
+    letter-spacing: -0.01em;
+    margin-top: 2.5em;
+    margin-bottom: 0.6em;
+  }
+  .prose-dark h2 {
+    font-size: 1.9rem;
+  }
+  .prose-dark h3 {
+    font-size: 1.45rem;
+  }
+  .prose-dark p {
+    margin-bottom: 1.4em;
+  }
+  .prose-dark a {
+    color: #c4b5fd;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(196, 181, 253, 0.4);
+  }
+  .prose-dark a:hover {
+    text-decoration-color: rgba(196, 181, 253, 0.9);
+  }
+  .prose-dark strong {
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .prose-dark em {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.06em;
+  }
+  .prose-dark ul,
+  .prose-dark ol {
+    margin: 0 0 1.4em 1.4em;
+    list-style: disc;
+  }
+  .prose-dark ol {
+    list-style: decimal;
+  }
+  .prose-dark li {
+    margin-bottom: 0.45em;
+  }
+  .prose-dark li::marker {
+    color: rgba(196, 181, 253, 0.6);
+  }
+  .prose-dark code {
+    font-size: 0.86em;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 0.15em 0.45em;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .prose-dark pre {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    overflow-x: auto;
+    margin-bottom: 1.6em;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+  .prose-dark pre code {
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .prose-dark blockquote {
+    border-left: 2px solid rgba(196, 181, 253, 0.5);
+    padding-left: 1.25rem;
+    margin: 2em 0;
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 1.25em;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .prose-dark hr {
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin: 3em 0;
+  }
+  .prose-dark img,
+  .prose-dark video {
+    border-radius: 16px;
+    margin: 2em 0;
+    max-width: 100%;
+  }
+}

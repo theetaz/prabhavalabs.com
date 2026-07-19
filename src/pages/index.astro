@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar';
+import Hero from '../components/Hero';
+import About from '../components/About';
+import Showcase from '../components/Showcase';
+import ProjectsGrid from '../components/ProjectsGrid';
+import Philosophy from '../components/Philosophy';
+import Footer from '../components/Footer';
+
+const all = (await getCollection('projects')).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+const featured = all.find((p) => p.data.featured)?.data ?? null;
+
+const cards = all.map((p) => ({
+  id: p.id,
+  title: p.data.title,
+  tagline: p.data.tagline,
+  description: p.data.description,
+  tags: p.data.tags,
+  repo: p.data.repo,
+  status: p.data.status,
+}));
+---
+
+<Layout>
+  <Navbar client:load currentPath="/" />
+  <Hero client:load />
+  <About client:visible />
+  <Showcase client:visible project={featured} />
+  <ProjectsGrid client:visible projects={cards} />
+  <Philosophy client:visible />
+  <Footer client:visible />
+</Layout>
