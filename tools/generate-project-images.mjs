@@ -52,6 +52,8 @@ const PROJECTS = {
     'a directed graph of glowing nodes with a stream of small light particles flowing along its edges toward a bright endpoint',
   mendlog:
     'a dark industrial machine silhouette with concentric voice ripples emanating from a single glowing point beside it',
+  attendly:
+    'a dark doorway with a stream of small glowing dots passing through it single file, each dot leaving a brief violet trace as it crosses the threshold, a faint grid of marked cells receding beyond',
 };
 
 async function generate(slug, subject) {
