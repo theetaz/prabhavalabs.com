@@ -1,29 +1,34 @@
 ---
-title: 'Why every project here ships with its story'
-description: 'The reasoning behind Prabhava Labs: open source is more useful when the process — the dead ends included — ships alongside the code.'
+title: 'Prabhava Labs: publishing the decision record with the code'
+description: 'The publishing model behind this studio: every open-source release ships with the reasoning that produced it, including the approaches that were rejected.'
 date: 2026-07-19
 tags: ['meta', 'open-source']
 ---
 
-Most open-source READMEs tell you *what* a tool does. Very few tell you *why*
-it exists, what was tried first, and which ideas died along the way. That
-context is usually the most valuable part — and it's the part that gets lost.
+An open-source README documents what a tool does. The reasoning that
+produced the tool, what was tried first, which designs were rejected and
+why, usually never gets published. For anyone evaluating the code or
+extending it, that reasoning is often more useful than the feature list,
+and it is the part that disappears.
 
-Prabhava Labs is an attempt to fix that for my own work. Every project that
-lands on [the shelf](/projects) comes with three things:
+Prabhava Labs is a publishing model built to keep that context attached to
+my own work. Every project on [the shelf](/projects) ships three
+artifacts:
 
-1. **The code** — MIT-licensed, on GitHub, no strings.
-2. **The story** — why it was built, what it replaced, where it struggled.
-3. **The decisions** — engineering write-ups on this blog when a problem was
-   interesting enough to deserve one.
+- **The code.** MIT licensed, on GitHub, with no restrictions beyond the
+  license.
+- **The story.** Why the project was built, what it replaced, and where
+  the design ran into trouble.
+- **The decisions.** Engineering write-ups on this blog when a problem
+  justifies a longer treatment.
 
-## What to expect here
+## What the blog covers
 
-This blog is the engineering notebook: performance investigations, API design
-arguments with myself, infrastructure choices for running things cheaply on
-the edge, and honest post-mortems when something didn't work.
+Posts here are working notes rather than announcements: performance
+investigations, API design decisions and the alternatives considered,
+infrastructure choices for running services cheaply on edge platforms,
+and post-mortems when a design did not work. When something failed, the
+write-up says so and states why.
 
-> A tool without its origin story is just code.
-
-If that sounds useful, the [RSS-friendly index](/blog) is the place to watch —
-or follow along on GitHub.
+New posts appear in the [index](/blog), which is RSS friendly, and each
+repository is public on GitHub as it develops.

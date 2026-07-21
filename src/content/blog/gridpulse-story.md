@@ -1,110 +1,112 @@
 ---
-title: 'An outage tracker has to work during the outage'
-description: 'GridPulse maps every power cut in Sri Lanka by fusing official CEB data with anonymous neighbour reports. The whole design falls out of one constraint: a phone, in the dark, on a bad connection.'
+title: 'GridPulse: an outage map that works during the outage'
+description: 'How GridPulse merges official CEB outage data with anonymous neighbour reports on one offline-first map, and why the design starts from a phone on a failing connection.'
 date: 2026-07-19
 tags: ['case-study', 'gridpulse', 'pwa']
 lang: 'en'
 ---
 
-A power cut in Sri Lanka comes with a ritual. You refresh the CEB Care site
-to see if your area made the list. You text a cousin two streets over,
-because whether they have power tells you if the problem is the grid or
-your own tripped main. Then you settle in with the real question, the one
-nothing answers: when is it coming back?
+An outage tracker has an awkward operating constraint: it is needed most at
+the exact moment the infrastructure around it is degrading. During a power
+cut in Sri Lanka the home router is down, the local mobile network is
+strained, and the user's phone is the one working screen, running on a
+battery they would rather not drain. The information needed at that moment
+mostly exists. The Ceylon Electricity Board publishes outage data, and
+neighbours know precisely what is happening on their street, which is how
+people distinguish a grid fault from their own tripped main. The two
+sources never meet, and neither is convenient from a phone during an
+outage. GridPulse puts both on one map, designed from that failure case
+outward.
 
-The frustrating part is that the information mostly exists. The Ceylon
-Electricity Board publishes outage data. Your neighbours know exactly what
-is happening on your street. But the official feed and the neighbourhood
-knowledge never meet, and neither is friendly to a phone in a dark room.
-GridPulse exists to put both on one map.
-
-## Two feeds, one story
+## Merging official and community reports
 
 GridPulse reads official outages from the publicly available CEB Care
-endpoints and shows them beside reports submitted by people who are
-actually sitting in the dark. The map draws both as layers you can toggle,
-and the home screen boils it all down to a plain-language answer: is the
-power out at your location, and how many neighbours are affected.
+endpoints and displays them beside reports submitted by people currently
+affected. The map draws each source as a toggleable layer, and the home
+screen reduces the data to a direct answer: whether the power is out at
+your location, and how many neighbours are affected.
 
-The interesting problem is duplication. If you report a cut that CEB has
-already announced, a naive app shows two markers for one event and the map
-slowly turns into noise. GridPulse merges the two into a single story, one
-outage backed by two kinds of evidence. The obligatory note: the project is
-not affiliated with or endorsed by CEB. It reads what CEB makes public and
-adds what CEB cannot see, which is what the street actually looks like.
+The main data problem is duplication. If a user reports a cut that CEB has
+already announced, a naive design renders two markers for one event and the
+map degrades into noise as reports accumulate. GridPulse merges an official
+announcement and its matching community reports into a single outage
+record backed by two kinds of evidence. The project is not affiliated with
+or endorsed by CEB; it reads what CEB publishes and adds the street-level
+picture CEB cannot see.
 
-## Anonymity as a conversion decision
+## Anonymous reporting as a participation requirement
 
-Reporting a cut takes two taps. Pick where it is, optionally add a note,
-submit. You never create an account. On first launch the app hands you a
-random pseudonym, something like "Brave Peacock", and that is the only
-identity attached to anything you report.
+Filing a report takes two taps: pick the location, optionally add a note,
+submit. There is no account. On first launch the app assigns a random
+pseudonym, such as "Brave Peacock", and that is the only identity attached
+to anything the user reports. The app collects no email address, no phone
+number, and no tracking data.
 
-This was less a privacy stance than an admission about human behaviour.
-Crowd data is only as good as the crowd, and a crowd only forms when
-contributing costs nothing. Nobody sitting in a dark house is going to
-complete an email verification flow to announce the obvious. So the app
-asks for nothing: no email, no phone number, no tracking.
+The decision came from participation economics rather than a privacy
+position. Crowd data is only as good as the crowd, and the crowd only
+forms when contributing costs nothing; a user sitting in a dark house will
+not complete an email verification flow to report the obvious. The
+trade-off is stated plainly: nothing prevents a wrong or bad-faith report.
+The official CEB layer provides a verified baseline, and merged records
+give each report more context than it would carry alone, but the community
+layer runs on good faith. I accepted that risk rather than add friction,
+because a fully verified map that nobody reports into carries no
+information.
 
-The trade-off is real. Nothing stops a wrong or mischievous report. The
-official CEB layer acts as ballast, and merged stories give a report more
-context than it would have alone, but the community layer ultimately runs
-on good faith. I chose to accept that rather than add friction, because a
-perfectly verified map with no reports on it helps nobody.
+## Offline as the primary state
 
-## Built for the failure case
+GridPulse is a PWA that treats connectivity as optional. After the first
+visit, the app shell, the map tiles for the user's area, and the last
+known set of outages are cached on the device, so the app opens and
+renders with no connection at all. A report filed offline enters a local
+queue and syncs automatically when the connection returns. The interface
+follows the same constraint: large touch targets, one-handed layouts, and
+a dark mode intended to be read in an unlit room.
 
-Here is the awkward constraint at the heart of the project: an outage
-tracker is most needed at the exact moment the infrastructure around it is
-failing. The router is down. The mobile network in the area is strained.
-Your phone is the one screen left, and you would rather not drain it.
+## Resolving location without GPS
 
-So GridPulse is a PWA that treats connectivity as a nice-to-have. Once you
-have opened it once, the app shell, the map tiles for your area, and your
-last known set of outages are cached on the device. A report filed while
-offline goes into a queue and syncs on its own when the connection returns.
-The interface follows the same logic: big touch targets, one-handed
-layouts, readable in dark mode, nothing precious.
+GPS is optional. When it is disabled, or when a user is checking on family
+in another town, a type-ahead search covers every populated place in the
+country, and a saved home location removes the need to search repeatedly.
+The geocoding and population data behind that search come from GeoPop,
+another Prabhava Labs project: a self-hosted Sri Lanka geocoder. A free
+app therefore does not depend on a paid geocoding API to resolve place
+names.
 
-## Where exactly is "here"
-
-GPS is optional. If it is off, or you are checking on family in another
-town, a type-ahead search covers every populated place in the country, and
-you can save a home location so the app stops asking where you live. The
-geocoding and population data behind that search come from GeoPop, another
-Prabhava Labs project: a self-hosted Sri Lanka geocoder, which means a free
-app does not have to lean on a paid geocoding API to know where Kurunegala
-is.
-
-## The name is the localization
+## Localization down to the name
 
 The app runs in English, Sinhala, and Tamil, with every label and message
-translated. The detail I care most about is the name. In Sinhala the app is
-not called "GridPulse". It is කරන්ට් කට්, literally "current cut", because
-that is simply what the event is called in daily speech. The Tamil name,
-கரன்ட் கட், is the same phrase. Localizing the name to the vernacular
-instead of protecting the brand felt more honest than the reverse.
+translated. The name is localized as well: in Sinhala the app is කරන්ට්
+කට්, literally "current cut", which is the term the event goes by in daily
+speech, and the Tamil name, கரன்ட் கட், is the same phrase. The name
+follows the vernacular term for the event rather than the brand.
 
-Beyond the live view there is a stats page: island-wide totals, active
-outages and people affected, today against yesterday, the worst-hit areas
-right now, and a per-area drilldown with peak-hour history. A single outage
-is an annoyance; the pattern of outages is information, and once the data
-is flowing, surfacing the pattern is nearly free.
+Beyond the live view, a stats page reports island-wide totals, active
+outages and people affected, today compared with yesterday, the worst-hit
+areas at the moment, and a per-area drilldown with peak-hour history. Once
+outage data is flowing through the system, the marginal cost of
+aggregating it is low, and the aggregate view turns individual outages
+into a pattern.
 
-## Where it stands
+## Status
 
 GridPulse is live at
 [gridpulse-cyr.pages.dev](https://gridpulse-cyr.pages.dev), with source at
 [github.com/prabhavalabs/gridpulse](https://github.com/prabhavalabs/gridpulse)
 under MIT.
 
-The honest caveats. It depends on publicly available CEB Care endpoints
-rather than an official API, so that integration can break whenever CEB
-changes something on their side, and there is nothing I can do about that
-except adapt quickly. And the community layer has the standard cold-start
-problem: reports make the map useful, a useful map attracts reporters, and
-that loop has to be started by people generous enough to report into a
-quiet map.
+Two known risks remain. The integration depends on publicly available CEB
+Care endpoints rather than an official API, so it can break whenever CEB
+changes something on their side; the only available mitigation is adapting
+quickly. The community layer also has a standard cold-start problem:
+reports make the map useful, and a useful map attracts reporters, but that
+loop has to be started by early users reporting into a quiet map.
 
-Sri Lanka is not the only country with this ritual. The license lets you
-fork it, swap the official data source, and point it at your own grid.
+## Moving forward
+
+Two design conclusions carry beyond this project. Building the client for
+its worst network case produced a better client in every case, and for
+crowd-sourced data, removing contribution friction matters more than
+verifying contributors. The design is not specific to Sri Lanka: the MIT
+license allows forking the project, swapping the official data source, and
+pointing it at another country's grid.

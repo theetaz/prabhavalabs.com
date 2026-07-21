@@ -1,107 +1,102 @@
 ---
-title: 'Transcribe everything twice'
-description: 'VoiceMind shows your words on screen while you record a memo, then quietly redoes the entire transcription after you stop. Both passes exist for different reasons.'
+title: 'VoiceMind: two transcription passes for every voice memo'
+description: 'Why VoiceMind streams audio to Deepgram Nova-2 while you record and re-transcribes the whole memo with Whisper afterwards: the live pass is feedback, the batch pass is the record.'
 date: 2026-07-19
 tags: ['case-study', 'voice-mind', 'transcription']
 lang: 'en'
 ---
 
-Voice memos have a retrieval problem. Recording one takes three seconds
-and zero thought, which is exactly why they pile up: a parking spot, half
-an app idea, something to tell someone later. Then two weeks pass and you
-are scrubbing through audio files named by date, listening to your own
-voice at 2x, looking for one sentence you can no longer place. Audio is a
-brilliant capture format and a terrible storage format.
+Voice memos have a retrieval problem. Capture takes seconds, which is why
+they accumulate: a parking spot, a partial idea, a reminder. Retrieval
+means scrubbing through audio files named by date, replaying your own
+voice to locate one sentence. Audio works as a capture format and fails
+as a storage format.
+[VoiceMind](https://github.com/prabhavalabs/voice-mind) converts memos to
+text automatically, with a summary per memo, so retrieval is reading
+rather than listening. The design decision this post covers is that every
+memo is transcribed twice, deliberately, by two different systems.
 
-[VoiceMind](https://github.com/prabhavalabs/voice-mind) is my answer:
-voice memos that turn into text automatically, with a summary on top, so
-finding a thought means reading instead of listening. The design decision
-worth writing about is in the title. Every memo gets transcribed twice, on
-purpose, by two different systems.
+## The streaming pass
 
-## Pass one: fast
+During recording, the audio does not sit in a local file. It streams over
+LiveKit to a transcription agent, and Deepgram Nova-2 returns words in
+real time, so the transcript assembles on screen while the user is still
+speaking.
 
-While you record, the audio does not sit in a file on your phone. It
-streams over LiveKit to a transcription agent, and Deepgram Nova-2 sends
-words back in real time, so the transcript assembles itself on screen
-while you are still talking.
+The purpose of this pass is not the text it produces. It is operational
+feedback: the visible transcript confirms that the system is receiving
+audio, the connection is up, and the memo will exist after recording
+ends. The alternative is recording into a silent interface with no
+confirmation until afterwards. The cost of streaming is accuracy: a model
+that must respond within milliseconds commits to words before the rest of
+the sentence arrives, and the output shows it.
 
-The live pass is not really about the text it produces. It is feedback.
-Watching your words appear as you say them tells you the system heard you,
-the connection is up, and the memo will actually exist afterwards.
-Recording into a silent interface and hoping is the old anxiety this
-replaces. The price of a streaming transcription is accuracy: a model that
-must answer within milliseconds commits to words before hearing how the
-sentence ends, and it shows.
+## The batch pass
 
-## Pass two: careful
+The second pass exists to fix that. Once recording stops, OpenAI Whisper
+re-transcribes the entire audio in one operation. Unlike the streaming
+model, Whisper sees the whole memo with context on both sides of every
+word and has no latency budget. The stored transcript, the one that gets
+searched and read later, comes from this pass.
 
-That is why the second pass exists. Once the recording stops, OpenAI
-Whisper re-transcribes the entire audio in one go. Unlike the streaming
-model, Whisper sees the whole memo with full context on both sides of
-every word, and it has no deadline. The transcript that gets kept, the one
-you search and read later, comes from this pass.
+The two passes split the job cleanly: Deepgram serves the recording
+experience, Whisper produces the record. The batch pass also emits
+word-level timestamps, which drive playback: when a memo is replayed,
+each word highlights as the audio reaches it, keeping the reader's
+position and the audio position aligned.
 
-So the two passes split the job cleanly: Deepgram is the experience while
-you record, Whisper is the record itself. Nobody rereads a live caption
-after the talk ends, and nobody wants their permanent notes taken by the
-fastest writer in the room.
+Once a reliable transcript exists, summarization costs little.
+GPT-4o-mini writes a short summary of every memo, and the per-call cost
+is low enough that it runs on everything, including seven-second parking
+notes.
 
-The careful pass also carries word-level timestamps, which pay for
-themselves in playback. When you replay a memo, each word highlights as
-the audio reaches it, karaoke style, so your eyes and ears stay in the
-same place. And once a reliable transcript exists, summarization is
-almost free: GPT-4o-mini writes a short summary of every memo, and it is
-cheap enough that running it on everything, including the
-seven-second parking notes, costs effectively nothing.
+## Why a memo app runs a WebRTC stack
 
-## Why a memo app owns a WebRTC stack
+The unusual part of the architecture is LiveKit: real-time media
+infrastructure of the kind deployed for video calls, inside an app that
+records solo audio notes. Record-then-upload would have been a fraction
+of the complexity.
 
-The strange-sounding part of this architecture is LiveKit. It is
-real-time media infrastructure, the kind of machinery you deploy for
-video calls, sitting inside an app whose job is recording solo audio
-notes. Record-then-upload would have been a fraction of the complexity.
-
-But record-then-upload cannot do the live pass. Words appearing while you
-speak requires audio flowing to a server while the microphone is still
-hot, and that is a streaming problem whether I like it or not. LiveKit
-brings costs beyond the server itself: its native modules mean Expo Go
-does not work, so development requires proper dev builds through Xcode or
-Android Studio, and the infrastructure needs TURN configured for phones on
-unfriendly networks. I paid that complexity for one feature. I still
-think the feature is the product.
+Record-then-upload cannot produce the streaming pass. Rendering words
+while the user speaks requires audio flowing to a server while the
+microphone is still open, which is a streaming media problem regardless
+of app size. LiveKit's costs extend beyond the server itself: its native
+modules rule out Expo Go, so development requires dev builds through
+Xcode or Android Studio, and the deployment needs TURN configured for
+phones on restrictive networks. That complexity pays for one feature, and
+I judged the feature to be the product.
 
 ## Self-hosting both halves
 
-The other deliberate choice is that nothing here runs on a managed cloud.
+The other deliberate choice is that nothing runs on a managed cloud.
 Supabase and LiveKit are both self-hosted on a VPS, with Docker Compose
 underneath and Caddy in front handling TLS.
 
-Voice memos earn that treatment more than most data. They are unfiltered
-thinking out loud, which is about as personal as a dataset gets, and I
-would rather they sit on a machine I control at a fixed monthly cost than
-in someone else's bucket. The honest cost is operations: the repo's docs
-folder contains six separate setup guides covering the VPS, Supabase,
-LiveKit, the database schema, edge functions, and the mobile build. When
-a side project needs six guides to stand up, self-hosting has stopped
-being free in any sense except the billing one.
+Voice memos justify this more than most data: they are unfiltered
+thinking out loud, among the most personal datasets a person produces,
+and keeping them on a controlled machine at a fixed monthly cost was the
+requirement. The operational cost is documented in the repository itself:
+the docs folder contains six separate setup guides covering the VPS,
+Supabase, LiveKit, the database schema, edge functions, and the mobile
+build. A side project that needs six guides to stand up is not free to
+operate, whatever the bill says.
 
-There is also a boundary worth admitting: the audio still leaves the VPS
-for the AI steps, since Deepgram, Whisper, and GPT-4o-mini are all
-external APIs. Self-hosting protects where memos live, not every hop they
-take along the way.
+One boundary needs stating. The audio still leaves the VPS for the AI
+steps, since Deepgram, Whisper, and GPT-4o-mini are all external APIs.
+Self-hosting controls where memos are stored, not every hop they take in
+processing.
 
-## Where it stands
+## Status and moving forward
 
-VoiceMind is an early prototype from February 2026, and the repo has been
-quiet since. The monorepo is honest about its ambitions in a way I find
-funny now: apps/mobile is a working Expo app, while apps/web (Next.js,
-phase 2) and apps/desktop (Tauri, phase 3) are folders containing mostly
-intention.
+VoiceMind is an early prototype from February 2026, and the repository
+has not changed since. The monorepo reflects its actual state: apps/mobile
+is a working Expo app, while apps/web (Next.js, phase 2) and apps/desktop
+(Tauri, phase 3) are scaffolding without implementations.
 
-The two-pass idea is the part I would keep in any future version. Paying
-for transcription twice sounds wasteful until you notice the passes answer
-different questions: "is this working?" during the recording, and "what
-did I say?" forever after. If the project moves again, the first job is
-the web app, because reading and searching your notes is exactly the part
-a phone screen is worst at.
+The two-pass design is the part that carries forward into any future
+version. The passes answer different questions: the streaming pass
+answers "is this working?" during recording, and the batch pass answers
+"what did I say?" for every read afterwards. Paying for transcription
+twice is the correct trade because no single system answers both. If work
+resumes, the first target is the web app, since reading and searching
+notes is the part of the product a phone screen serves worst.

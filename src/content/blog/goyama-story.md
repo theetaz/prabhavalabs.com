@@ -1,113 +1,114 @@
 ---
-title: 'Why Goyama starts with a schema instead of an app'
-description: 'I am building an agricultural platform for Sri Lanka, and the first deliverable is not an app. It is a knowledge corpus where every field knows where it came from.'
+title: 'Goyama: building the agricultural knowledge corpus before the app'
+description: 'Why an agricultural platform for Sri Lanka starts with a provenance-tracked trilingual corpus instead of an app, and how location and human review are built into the schema.'
 date: 2026-07-19
 tags: ['case-study', 'goyama', 'open-data']
 lang: 'en'
 ---
 
-Ask the internet how to grow brinjal and you will get an answer. It will be
-a confident answer, probably written for an Indian or American audience,
-and it will be wrong for a farmer in Nuwara Eliya in a way it is not wrong
-for a farmer in Hambantota. Sri Lanka has 46 agro-ecological zones packed
-into an island you can drive across in a day. It has wet, intermediate, and
-dry zones, two cultivation seasons (Maha and Yala) tied to two different
-monsoons, and rice varieties like BG, BW, and AT lines that no global crop
-database has heard of. Advice that ignores all of this is not advice. It is
-noise with a planting date.
+Agricultural advice is location-sensitive in ways generic content ignores.
+Sri Lanka packs 46 agro-ecological zones into an island that can be crossed
+in a day, spans wet, intermediate, and dry zones, runs two cultivation
+seasons (Maha and Yala) tied to two different monsoons, and grows rice
+varieties such as the BG, BW, and AT lines that no global crop database
+covers. Guidance written for an Indian or American audience is wrong for a
+farmer in Nuwara Eliya in ways it is not wrong for a farmer in Hambantota.
+[Goyama](https://github.com/prabhavalabs/goyama) is an agricultural
+platform for Sri Lanka whose first deliverable is not an app but the data
+layer such an app would need.
 
-Here is the frustrating part: the real knowledge exists. Sri Lanka's
-Department of Agriculture and its research institutes have published
-decades of genuinely good material on crops, varieties, diseases, and
-remedies. But it lives scattered across PDFs, old websites, and bulletins,
-usually in one language at a time, and none of it is structured. You cannot
-query it. You cannot build an app on it. You can only read it, if you know
-where to look and happen to read the language it was written in.
+## Motivation
 
-[Goyama](https://github.com/prabhavalabs/goyama) is my attempt to fix the
-substrate before building anything on top of it.
+The knowledge to do better exists. Sri Lanka's Department of Agriculture
+and its research institutes have published decades of solid material on
+crops, varieties, diseases, and remedies. The problem is its form: the
+material is scattered across PDFs, old websites, and bulletins, usually in
+one language at a time, and none of it is structured. It cannot be
+queried, and no application can be built on it. Access requires knowing
+where to look and reading the language a given document happens to use.
 
-## Data first, code second
+## The corpus is the product
 
-The founding decision, and the one that shapes everything else, is that
-Goyama's core asset is not an app. It is a structured, trilingual corpus of
-Sri Lankan agriculture: crops, varieties, diseases, pests, remedies,
-cultivation calendars, agro-ecological zone polygons, and market context.
-The plan is to gather it by crawling public sources, extract it into a
-strict schema, have agronomists review it, and release it under open
-licences. The apps for farmers come after, and they are deliberately thin:
-nothing is hardcoded, content lives in the corpus, the apps render it.
+The founding decision, which shapes everything downstream, is that
+Goyama's core asset is a structured, trilingual corpus of Sri Lankan
+agriculture: crops, varieties, diseases, pests, remedies, cultivation
+calendars, agro-ecological zone polygons, and market context. The pipeline
+crawls public sources, extracts content into a strict schema, routes it
+through agronomist review, and releases it under open licences. The farmer
+apps come after and are deliberately thin: no content is hardcoded, the
+corpus holds it, and the apps render it.
 
-Building a corpus before a product is slow, and I know how that sounds.
-But the alternative is what most agri apps do: hardcode a few crop guides,
-ship, and let the content rot. If the knowledge layer is the product, it
-has to be built like one.
+The trade-off is speed. Building a corpus before a product is slower than
+the common alternative of hardcoding a few crop guides and shipping, but
+hardcoded content is not maintained and degrades. If the knowledge layer
+is the product, it has to be engineered as one.
 
 ## Provenance on every field
 
-The part of the schema I care most about is provenance. Every published
-record carries a canonical identity (slug, scientific name, and local
-names in Sinhala, Tamil, and English), and every individual field carries
+The most consequential part of the schema is provenance. Every published
+record carries a canonical identity: a slug, the scientific name, and
+local names in Sinhala, Tamil, and English. Every individual field carries
 its own source URL, the quote it was extracted from, an extraction
 confidence score, the reviewer, and a review timestamp. History is
 append-only with a public changelog.
 
-That level of bookkeeping is tedious, and for most datasets it would be
-overkill. For this one it is not optional. Some of these records will say
-things like "apply this chemical at this dosage" to people who will act on
-them. So there is a hard gate in the pipeline: chemical dosages,
-pre-harvest intervals, and disease-remedy pairs never publish without an
-agronomist's review. A crawler can propose; only a human can approve. This
-is the least automatable part of the whole project and the least
-negotiable.
+That bookkeeping would be excessive for most datasets. Here it is
+required, because some records state chemical dosages that people will
+act on. The pipeline enforces a hard gate: chemical dosages, pre-harvest
+intervals, and disease-remedy pairs never publish without an agronomist's
+review. A crawler can propose a record; only a human can approve it. This
+is the least automatable step in the project and the least negotiable.
 
-Licensing gets the same explicitness. Code is MIT, corpus content is
-CC-BY-SA 4.0, geodata is ODbL, and third-party media is linked, never
-redistributed. Since the whole premise is building on public work by the
-Department of Agriculture and institutes like HORDI and HARTI, every
-extracted field links back to its source.
+Licensing is equally explicit. Code is MIT, corpus content is CC-BY-SA
+4.0, geodata is ODbL, and third-party media is linked rather than
+redistributed. Since the project builds on public work by the Department
+of Agriculture and institutes such as HORDI and HARTI, every extracted
+field links back to its source.
 
 ## Location as the index
 
-The other structural decision: every recommendation is bound to a location.
-Not a country or a province, but the actual agro-ecological envelope a
-farm sits in. Which is why the first working endpoint in the repo is not a
-crop guide. It is a geo lookup. Send it any Sri Lanka coordinate and it
-resolves the district, the DS division, and the agro-ecological zone with
-its rainfall and dominant soil groups. A coordinate in Kandy comes back as
-zone WM3: wet zone, mid country, around 2100mm of rain.
+The second structural decision binds every recommendation to a location,
+and not at country or province granularity but at the agro-ecological
+envelope a farm sits in. The first working endpoint in the repository is
+therefore a geo lookup rather than a crop guide. It accepts any Sri Lanka
+coordinate and resolves the district, the DS division, and the
+agro-ecological zone with its rainfall and dominant soil groups. A
+coordinate in Kandy resolves to zone WM3: wet zone, mid country, around
+2100mm of rain. Cultivation calendars and variety recommendations key off
+that envelope; a recommendation without an AEZ attached is the generic
+advice the project exists to replace.
 
-Everything else keys off that envelope. A cultivation calendar or a variety
-recommendation without an AEZ attached is exactly the generic advice the
-project exists to replace.
-
-The second working endpoint is daily market prices from Dambulla's
+The second working endpoint serves daily market prices from Dambulla's
 Dedicated Economic Centre, imported from HARTI bulletins. Prices are the
-thing farmers check most often, and unlike the corpus they are useful from
-day one, which makes them a good early deliverable while the knowledge
-pipeline matures.
+data farmers check most often, and unlike the corpus they are useful from
+day one, which makes them a practical early deliverable while the
+knowledge pipeline matures.
 
-## Boring stack, locked on purpose
+## A stack chosen for long maintenance
 
-The tech decisions are locked and deliberately unadventurous: Go with chi,
-pgx, and sqlc for the API; Postgres with PostGIS for the geospatial core
-and pgvector for later; Vite and React for the web apps; Expo for mobile;
-MapLibre with self-hosted vector tiles for maps; Python for the ingestion
-pipelines. Every choice optimises for a solo developer maintaining this
-for years, not for interesting architecture. The interesting part of
-Goyama is the data. The code should stay out of its way.
+The technical choices are locked and deliberately conventional: Go with
+chi, pgx, and sqlc for the API; Postgres with PostGIS for the geospatial
+core and pgvector reserved for later; Vite and React for the web apps;
+Expo for mobile; MapLibre with self-hosted vector tiles for maps; Python
+for the ingestion pipelines. Each choice optimises for one developer
+maintaining the system for years. The differentiating asset is the data,
+and the code is kept simple enough not to compete with it for attention.
 
-## Where it honestly stands
+## Status
 
-The corpus version number is v0.0, and I chose that number to keep myself
-honest. The schema and ingestion pipeline are in progress. The repo today
-is planning documents, the domain model, the two endpoints above, and a
-set of directories marked "coming soon". The dev fixtures ship simplified
-polygons, not real boundaries. There is no disease scanner yet, no
-marketplace, no mobile app. Those are all specified in the docs, which is
-a different thing from existing.
+The corpus is at v0.0, and the version number is accurate: the corpus is
+effectively empty. The schema and ingestion pipeline are in progress. The
+repository today contains planning documents, the domain model, the two
+endpoints described above, and directories marked "coming soon". The dev
+fixtures ship simplified polygons, not real boundaries. There is no
+disease scanner, no marketplace, and no mobile app; those are specified in
+the documentation, which is not the same as existing.
 
-What Goyama needs most right now is not code. It is eyes on the review
-queue: agronomists, extension officers, researchers, and anyone who can
-spot a wrong dosage or a mistranslated variety name. If that is you, the
-contributing guide and GitHub Discussions are open.
+## Moving forward
+
+The near-term work is filling the schema: running the crawlers, extracting
+records, and moving them through review. The binding constraint is review
+capacity rather than code. The project needs agronomists, extension
+officers, researchers, and anyone able to spot a wrong dosage or a
+mistranslated variety name in the review queue. The contributing guide and
+GitHub Discussions are open.

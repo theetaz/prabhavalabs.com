@@ -1,19 +1,52 @@
 ---
-title: 'The repair happened, the record did not'
-description: 'MendLog wants to replace the paper form technicians skip with a voice memo they will actually make. It is early enough that nothing is wired up yet, and this post says so.'
+title: 'MendLog: voice capture as the primary interface for repair records'
+description: 'The design behind MendLog: Sinhala and English voice memos transcribed into structured repair records with semantic retrieval over pgvector. Nothing is wired up yet, and this post says so.'
 date: 2026-07-19
 tags: ['case-study', 'mendlog', 'voice']
 lang: 'en'
 ---
 
-A machine repair technician's day produces two things: fixed machines and paperwork about the fixing. Only one of those is optional in practice. The form that should capture root cause, corrective action, idle time and parts used gets filled in later, or from memory, or not at all, because the next machine is already down. The result is an organisation that repairs the same faults over and over while the knowledge of past diagnoses sits in the heads of whoever happened to be on shift.
+Machine repair generates records that rarely get written. The form that
+should capture root cause, corrective action, idle time, and parts used
+is filled in later, from memory, or not at all, because the next machine
+is already down. The organization then repairs the same faults
+repeatedly while the diagnostic knowledge stays in the heads of whoever
+was on shift. [MendLog](https://github.com/prabhavalabs/MendLog) is a
+bet that the medium is the problem: forty years of skipped paper forms
+suggest the form itself does not survive a workshop, and speech does.
+The technician records a voice memo in Sinhala or English, takes a few
+photos, and moves on. MendLog transcribes the memo, extracts the
+structured fields the form would have collected, and files the job.
 
-[MendLog](https://github.com/prabhavalabs/MendLog) is a bet that the fix is changing the medium, since forty years of paper forms suggest the form itself is the problem. Talking is the one documentation method that survives a workshop. So instead of a form, the technician records a voice memo in Sinhala or English, snaps a few photos, and moves on. MendLog transcribes the memo, extracts the structured fields the form wanted anyway, and files the job.
+## Retrieval is the other half
 
-The second half of the bet is retrieval. A filing cabinet of past repairs is only useful if you can interrogate it, so jobs are semantically searchable by text, photo or error code through pgvector. The technician staring at a fault code on an unfamiliar machine should be able to surface how a colleague diagnosed the same fault months earlier, which is the moment all that captured knowledge pays for itself.
+A repair archive is useful only if it can be queried. Jobs are
+semantically searchable by text, photo, or error code through pgvector.
+The target case is concrete: a technician facing a fault code on an
+unfamiliar machine should be able to retrieve how a colleague diagnosed
+the same fault months earlier. That query is the point at which the
+captured records pay back the cost of capturing them.
 
-The stack is chosen for the environment rather than the demo. React Native with Expo, Android first, because the target device is a mid-range Android phone, and that constraint makes memory efficiency and offline tolerance design requirements rather than optimizations. Supabase covers Postgres, auth, storage and the vector search in one place, which is about the right amount of backend for a solo project at this stage. OpenAI does the transcription and structured extraction, and doing justice to spoken Sinhala is exactly the kind of thing I intend to test before trusting.
+## Stack
 
-Now the honest part, and the reason this post is short: MendLog is in early development and nothing is wired up yet. There is a README, a license, a plan, and conviction. No pipeline runs. Every paragraph above describes intent, and I would rather say that plainly than write around it.
+The stack is chosen for the deployment environment rather than for a
+demo. React Native with Expo, Android first, because the target device
+is a mid-range Android phone; that constraint makes memory efficiency
+and offline tolerance design requirements rather than optimizations.
+Supabase provides Postgres, auth, storage, and the vector search in one
+service, which is the right amount of backend for a solo project at this
+stage. OpenAI handles transcription and structured extraction;
+transcription quality on spoken Sinhala is unverified, and I intend to
+test it before trusting it.
 
-The next milestone is unglamorous and decisive: record a memo on a cheap Android phone, get a correctly structured job out the other end, in both languages. If that works, MendLog is real. If it does not, at least the failure will be documented, which is more than the paper forms manage.
+## Status
+
+MendLog is in early development and nothing is wired up yet. The
+repository contains a README, a license, and a plan; no pipeline runs.
+Every paragraph above describes intent, and it is better to state that
+plainly than to write around it.
+
+The next milestone is the decisive one: record a memo on a low-cost
+Android phone and get a correctly structured job record out the other
+end, in both languages. That result either validates the core bet or
+ends the project, and either outcome will be documented.

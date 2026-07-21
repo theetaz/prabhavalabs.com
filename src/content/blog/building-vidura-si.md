@@ -1,137 +1,133 @@
 ---
-title: 'Vidura හදපු කතාව: YouTube මගේ server එකට කතා කරන්න බෑ කිව්වා'
-description: 'YouTube වීඩියෝවලට සිංහල උපසිරැසි දාන app එකක් හදද්දී මුණගැහුණු ප්‍රශ්න: block වුණු IP, residential proxy එකක්, එක විශාල LLM call එකක්, සහ UI එක අවංක වීමේ වටිනාකම.'
+title: 'Vidura: YouTube සඳහා frame-accurate සිංහල උපසිරැසි engineering කළ ආකාරය'
+description: 'Vidura පිටුපස transcript pipeline එක: datacenter IP වලට YouTube captions ගන්න බැරි ඇයි, residential proxy එකයි ASR fallback එකයි එකට ගැළපෙන ආකාරය, සහ පරිවර්තනය එක structured-output call එකකින් සිදුවන හේතුව.'
 date: 2026-07-19
 tags: ['case-study', 'vidura', 'llm']
 lang: 'si'
 translationOf: 'building-vidura'
 ---
 
-මම බලපු හොඳම ගණිත දේශනය තිබුණේ YouTube එකේ, විනාඩි 40ක ඉංග්‍රීසි
-වීඩියෝවක. මට වඩා දක්ෂ මගේ ඥාති සහෝදරයාට ඒක ඉවර කරන්න බැරි වුණා.
-ගණිතය නිසා නෙවෙයි. ඉංග්‍රීසිය නිසා. එක වාක්‍යයක් තේරුම් ගන්න එයා
-එකම තත්පර 30 තුන් සැරයක් rewind කරනවා බලං ඉද්දී මට දෙයක් වැටහුණා:
-අධ්‍යාපනික YouTube වල භාෂා බාධකය දැනුමේ ප්‍රශ්නයක් නෙවෙයි, ඔරොත්තු
-දීමේ ප්‍රශ්නයක්. එක වීඩියෝවකට නම් කොහොමහරි ඔරොත්තු දෙයි. සම්පූර්ණ
-course එකකට කවුරුවත් ඔරොත්තු දෙන්නේ නෑ.
+YouTube හි ඇති හොඳම අධ්‍යාපනික අන්තර්ගතය බහුතරයක් ඉංග්‍රීසියෙන්.
+සිංහල කථිකයෙකුට ඒ භාෂා බාධකය නිසා විනාඩි 20ක පාඩමක් නැවත නැවත
+rewind කරමින් බලන්න සිදුවෙනවා. YouTube ගේ auto-translate උපසිරැසි
+සිංහලට ලැබෙන්නේ වචනයෙන් වචනය පරිවර්තනය වූ, ප්‍රායෝගිකව කියවිය
+නොහැකි ප්‍රතිඵලයක් ලෙසයි. වාණිජ dubbing සේවා සිංහල භාෂාව ආවරණය
+කරන්නේම නැහැ. [Vidura](https://vidura.prabhavalabs.com) මේ ප්‍රශ්නයට
+කෙලින්ම යොමු වෙනවා: වීඩියෝවක transcript එක ලබාගෙන, LLM එකකින්
+පරිවර්තනය කර, embedded player එක මත සමමුහූර්ත සිංහල උපසිරැසි ලෙස
+පෙන්වන mobile-first PWA එකක්. ඒ සමඟම user ගේ watch history එකේ
+ground වූ chat සහායකයෙකුත් ඇත. සම්පූර්ණයෙන් self-hosted වන මෙහි
+අමාරුම ප්‍රශ්න දෙක වූයේ transcript එක ලබාගැනීම සහ පරිවර්තනය
+කියවිය හැකි මට්ටමට ගෙන ඒමයි.
 
-YouTube ගේ උත්තරය auto-translate කරපු උපසිරැසි. සිංහලට ඒවා ඇත්තටම
-නරකයි. වචනයෙන් වචනය පරිවර්තනය, කොහෙන්වත් ආපු ව්‍යාකරණ, තාක්ෂණික
-වචන අමුතුම කවි බවට පත් වෙනවා. ඒ නිසා මම
-[Vidura](https://vidura.prabhavalabs.com) හැදුවා: YouTube link එකක්
-paste කළාම, මිනිහෙක් කියන විදිහට ලියැවුණු, වීඩියෝවට සමමුහූර්ත වුණු
-සිංහල උපසිරැසි සමඟ වීඩියෝව ලැබෙන PWA එකක්. ඒ එක්කම transcript එක
-ඇත්තටම කියවපු AI chat සහායකයෙකුත් ඉන්නවා.
+<img src="/images/blog/vidura/watch.png" alt="Vidura watch පිටුව: සිංහල උපසිරැසි සමඟ YouTube වීඩියෝවක්, transcript එකට ඉහළින් provenance badges" />
 
-<img src="/images/blog/vidura/watch.png" alt="Vidura හි watch පිටුව: සිංහල උපසිරැසි සමඟ YouTube වීඩියෝවක්" />
+*රූපය 1: Watch පිටුව. Transcript එකට ඉහළින් ඇති provenance badges වලින් timestamps ආ තැන සහ පරිවර්තනය කළ model එක පෙන්වයි.*
 
-මේ ලිපිය ඒ ව්‍යාපෘතිය මරන්න ආසන්න වුණු ප්‍රශ්න දෙක ගැනයි, ඒවා
-විසඳපු ටිකක් අවලස්සන engineering ගැනයි.
+## පසුබිම
 
-## පළමු ප්‍රශ්නය: YouTube servers එක්ක කතා කරන්නේ නෑ
+මුල් implementation එක සරලයි: video ID එකට caption track එක
+ලබාගන්නවා, පරිවර්තනය කරනවා, පෙන්වනවා. Local development වලදී වැඩ
+කළ මේ ක්‍රමය production වලදී වහාම අසාර්ථක වුණා. වෙනස තිබුණේ server
+එකේ network position එකේයි.
 
-මගේ පළමු version එක ලැජ්ජා හිතෙන තරම් සරලයි. Server එක video ID එක
-අරගෙන caption track එක ගන්නවා, පරිවර්තනය කරනවා, ඉවරයි. මගේ laptop
-එකේ පළමු try එකෙන්ම වැඩ කළා. VPS එකට deploy කරලා link එකක් paste
-කළාම මොකුත්ම ආවේ නෑ. ආයෙ try කළාම error codes එක්ක මොකුත් ආවේ නෑ.
+Datacenter IP පරාසවලින් එන requests වලට YouTube bot detection යොදනවා,
+අඩු වියදම් VPS එකක් තියෙන්නේ හරියටම එවැනි පරාසයක් තුළයි. Residential
+connection එකකින් සාර්ථක වූ එම request එකම server එකෙන් යද්දී bot
+challenge එකක් ලැබුණා. User agents මාරු කිරීම, backoff, cookie
+persistence කිසිවකින් ප්‍රතිඵලය වෙනස් වුණේ නැහැ. ව්‍යුහාත්මකව
+වෙනස් විය නොහැකි දෙයක්: YouTube පැත්තෙන් බලද්දී caption tracks
+ඉල්ලන datacenter server එකක් scraper එකකින් වෙන් කර හඳුනාගත නොහැකියි.
 
-ඇතුළට වැටෙනකම් කවුරුත් කියලා දෙන්නේ නැති දේ මේකයි: datacenter IP
-පරාසවලින් එන requests YouTube සලකන්නේ bots විදිහට, මොකද ගොඩක් වෙලාවට
-ඒවා ඇත්තටම bots. මගේ ලාබ VPS එක තියෙන්නේ හරියටම එහෙම පරාසයක. ගෙදර
-connection එකෙන් සුමටව ගිය request එකම server එකෙන් යද්දී bot check
-එකක වැදුණා.
+## Transcript pipeline එක
 
-<img src="/images/blog/vidura/diagram-transcript.svg" alt="රූප සටහන: VPS එකෙන් කෙළින්ම යන requests block වෙනවා; residential proxy හරහා yt-dlp caption track එකට ළඟා වෙනවා; Gemini audio ASR fallback එක" />
+<img src="/images/blog/vidura/diagram-transcript.svg" alt="රූප සටහන: VPS එකෙන් කෙළින්ම යන requests block වෙයි, residential proxy හරහා yt-dlp caption track එකට ළඟා වෙයි, Gemini audio transcription fallback එකයි" />
 
-මම මුලින්ම ආචාරශීලී විකල්ප try කළා. User agents මාරු කිරීම, backoff,
-cookies. එකකින්වත් වැඩක් වුණේ නෑ, ඒක සාධාරණයි කියලත් කියන්න ඕන:
-YouTube පැත්තෙන් බලද්දී මගේ server එක scraper farm එකකට සමානයි.
-අන්තිමට හරි ගිය විසඳුම නීරසයි, සල්ලිත් යනවා: yt-dlp ගෙවන residential
-proxy එකක් හරහා යැවීම. දැන් request එක පිටවෙන්නේ සාමාන්‍ය ගෙදරක ISP
-එකකට අයිති IP එකකින්. YouTube මොකුත් වුණේ නැති ගානට caption track
-එක දෙනවා.
+*රූපය 2: Transcript ලබාගැනීම. ප්‍රාථමික මාර්ගය YouTube ගේම caption track එක; audio transcription fallback එකයි.*
 
-Audio එක transcribe කරනවා වෙනුවට official captions වලට මෙච්චර මහන්සි
-වෙන්නේ ඇයි? Timestamps නිසා. YouTube ගේම caption track එක frame
-එකටම නිවැරදියි. Proxy නැති වෙලාවට හෝ captions නැති වීඩියෝවලට Vidura
-audio transcription එකට fallback වෙනවා, ඒත් ඒක වැටෙන්නේ තත්පර තුනක
-විතර පරාසයකට. තත්පර තුන කියන්නේ උපසිරැසි සහ ටිකක් හොල්මන් වදින
-karaoke යන්ත්‍රයක් අතර වෙනස.
+Production pipeline එකේ, timestamp ගුණාත්මකභාවය අනුව අනුපිළිවෙළ වූ
+මාර්ග දෙකක් ඇත:
 
-ඒ fallback එකෙන් මම පුදුම විදිහට ආඩම්බර වෙන design තීරණයක් බිහි
-වුණා: Vidura හි හැම වීඩියෝවක්ම provenance badge එකක් පළඳිනවා.
-Timestamps ආවේ YouTube captions වලින්ද audio transcription එකෙන්ද
-කියලා ඒක කියනවා, ගණනය කරපු sync score එකක් පෙන්නනවා, පරිවර්තනය කළ
-model එකේ නමත් කියනවා. Data එක දෙවැනි පෙළේ නම් UI එක ඒක පිළිගන්නවා.
-තව apps වලටත් දේවල් පිළිගන්න පුළුවන් නම් හොඳයි.
+- **ප්‍රාථමික: ගෙවන residential proxy එකක් හරහා yt-dlp.** Request
+  එක සාමාන්‍ය ගෘහස්ථ ISP ලිපිනයකින් පිටවන අතර YouTube caption track
+  එක සාමාන්‍ය පරිදි ලබා දෙයි. මේ මාර්ගයට ප්‍රමුඛත්වය ලැබෙන්නේ
+  YouTube ගේම captions වල frame-accurate timestamps ඇති නිසයි.
+- **Fallback: Gemini මගින් audio transcription.** Proxy එකක් configure
+  කර නොමැති විට හෝ වීඩියෝවකට caption track එකක් නොමැති විට Vidura
+  audio එක transcribe කරයි. ASR වලින් එන timestamps තත්පර තුනක පමණ
+  පරාසයක වැටෙන අතර, දේශනයක් අනුගමනය කිරීමට ප්‍රමාණවත් වුවත්
+  subtitle sync සඳහා පැහැදිලිවම දුර්වලයි.
 
-## දෙවැනි ප්‍රශ්නය: robot කෙනෙක් වගේ නැති පරිවර්තනයක්
+මාර්ග දෙකේ ගුණාත්මක වෙනස product තීරණයකට හේතු වුණා: සෑම
+වීඩියෝවක්ම එහි timestamps ආවේ YouTube captions වලින්ද transcription
+එකෙන්ද යන්න කියන provenance badge එකක්, ගණනය කළ sync score එකක්,
+සහ පරිවර්තනය කළ model එකේ නම සමඟ පෙන්වයි. Data එක අඩු
+ගුණාත්මක විට, interface එක ඒ දෙක සමාන ලෙස ඉදිරිපත් නොකර
+ඒ බව ප්‍රකාශ කරයි.
 
-Caption track එකක් පරිවර්තනය කරන්න පේන සරලම විදිහ line by line.
-Cues හරහා loop කරලා එකින් එක model එකට යවලා උත්තර ලියාගන්නවා. මම
-මුලින්ම හැදුවේ ඒක, ලැබුණේ රසවත් කුණු. එක එක line එක තනියම බැලුවම
-හරි. එකට කියවද්දී "function" කියන වචනය එක දේශනයක් ඇතුළේ සිංහල වචන
-තුනක් වුණා, වාක්‍ය cue සීමාවලදී කැඩුණා, කවදාවත් හඳුන්වලා නොදුන්
-මිනිස්සුන්ට pronouns යොමු වුණා.
+## පරිවර්තනය: එක structured-output call එකක්
 
-ප්‍රශ්නය context එක. Caption cue එකක් වාක්‍යයක් නෙවෙයි, කථිකයා
-හුස්ම ගත්ත තැන විතරයි. Cues වෙන වෙනම පරිවර්තනය කිරීම කියන්නේ මතක
-නැතිකමින් පරිවර්තනය කිරීම.
+පළමු පරිවර්තන implementation එක caption cues හරහා iterate වී එක
+එකක් වෙන වෙනම පරිවර්තනය කළා. ප්‍රතිඵලයේ ගුණාත්මකභාවය අඩු වූයේ
+නිශ්චිතව හඳුනාගත හැකි ආකාරයකට: terminology drift වුණා (එක ඉංග්‍රීසි
+term එකක් දේශනයක් තුළ සිංහල වචන තුනක් බවට පත් වුණා), වාක්‍ය cue
+සීමාවලදී කැඩුණා, pronouns වල referents නැති වුණා. මූල හේතුව:
+caption cue එකක් වාක්‍යයක් නොවේ; එය කථිකයා නතර වූ තැන පමණයි.
+Cues වෙන වෙනම පරිවර්තනය කිරීම යනු context නොමැතිව පරිවර්තනය
+කිරීමයි.
 
-<img src="/images/blog/vidura/diagram-translate.svg" alt="රූප සටහන: caption lines වෙන වෙනම පරිවර්තනය කළාම terms මාරු වෙනවා; Vidura සම්පූර්ණ transcript එක එක structured-output call එකකින් යවනවා" />
+<img src="/images/blog/vidura/diagram-translate.svg" alt="රූප සටහන: caption lines වෙන වෙනම පරිවර්තනයෙන් drift ඇතිවේ; Vidura සම්පූර්ණ transcript එක එක structured-output call එකකින් යවයි" />
 
-ඒ නිසා Vidura කරන්නේ අනිත් පැත්ත: සම්පූර්ණ transcript එකම, grounding
-එකට වීඩියෝ title සහ description එකත් එක්ක, එක structured-output call
-එකකින් යැවීම. එක line එකක්වත් පරිවර්තනය කරන්න කලින් model එක මුළු
-දේශනයම දකිනවා. මිනිස් පරිවර්තකයෙක් වැඩ කරන්නෙත් එහෙමයි. විනාඩි 2 සිට
-විනාඩි 40 දක්වා terminology එක එකම විදිහට තියෙනවා, model එක අදහස
-ඇත්තටම ඉවර වෙන තැන දන්න නිසා වාක්‍ය cue සීමා හරහා ගලාගෙන යනවා.
+*රූපය 3: Cue-by-cue පරිවර්තනය හා සම්පූර්ණ-transcript පරිවර්තනය අතර වෙනස.*
 
-මේක ආරක්ෂිත කරන guardrails දෙකක් තියෙනවා. Core prompt එක immutable,
-ඒ නිසා user කෙනෙක්ගේ custom tone settings වලින් output format එක
-කැඩෙන්නේ නෑ. Alignment gate එකක් ප්‍රතිඵලය source cues එක්ක ගළපලා
-බලනවා; timestamps වලින් ඈත් වුණු පරිවර්තනයක් කාටවත් පේන්න කලින්
-අහුවෙනවා.
+Production design එක මෙය ප්‍රතිලෝම කරයි: සම්පූර්ණ transcript එකම,
+grounding සඳහා වීඩියෝ title සහ description සමඟ, එක structured-output
+call එකකින්. Model එක කිසිදු line එකක් පරිවර්තනය කිරීමට පෙර මුළු
+දේශනයම දකින නිසා විනාඩි 2 සිට 40 දක්වා terminology ස්ථාවරව පවතින
+අතර වාක්‍ය cue සීමා හරහා ගලා යයි. මෙය ආරක්ෂිත කරන guardrails
+දෙකක් ඇත: core prompt එක immutable බැවින් user-configurable tone
+settings වලින් output format එක දූෂණය විය නොහැක; alignment gate
+එකක් ප්‍රතිඵලය source cues වලට එරෙහිව validate කරයි.
 
-[OpenRouter](https://openrouter.ai) වටින තැනත් මේකයි. සම්පූර්ණ
-transcript calls ලොකුයි, විනාඩි 40ක දේශනයක් කියන්නේ tokens ගොඩක්.
-OpenRouter හරහා මට එකම code එක, පරිවර්තනයක මිල බින්දුවට වට වෙන්න ඕන
-වෙලාවට DeepSeek වෙතටත්, වීඩියෝවකට වටින සැලකිල්ල ඕන වෙලාවට GPT
-වෙතටත් යොමු කරන්න පුළුවන්, integration එකට අත නොතියා. Model මාරු
-කිරීම deploy එකක් නෙවෙයි, settings වෙනසක් විතරයි. තමන්ගේම
-infrastructure වලට තමන්ම ගෙවන එක්කෙනෙක්ට ඒ නිදහස තමයි දිගටම දුවන
-experiment එකක් සහ නිශ්ශබ්දව නවත්තපු එකක් අතර වෙනස.
+සම්පූර්ණ-transcript calls විශාල බැවින් model routing පහසුකමක් නොව
+ආර්ථික අවශ්‍යතාවක් වුණා. Vidura models වලට කතා කරන්නේ OpenRouter
+හරහයි: ආසන්න-ශුන්‍ය marginal වියදමට DeepSeek, වීඩියෝවකට වටින විට
+GPT-පන්තියේ models. මාරු කිරීම code වෙනසක් නොව settings වෙනසකි.
+Self-funded පද්ධතියකට, feature එක ආර්ථිකව පවත්වාගෙන යා හැක්කේ
+ඒ නම්‍යශීලීත්වය නිසයි.
 
-<img src="/images/blog/vidura/library.png" alt="Vidura library පිටුව: process කරපු වීඩියෝ සහ ඒවායේ sync scores" />
+<img src="/images/blog/vidura/library.png" alt="Vidura library පිටුව: process කළ වීඩියෝ ඒවායේ sync scores සමඟ" />
 
-## නොමිලේ ලැබුණු කොටස්
+*රූපය 4: Library එක. Process කළ සෑම වීඩියෝවක්ම එහි sync score එක සහ පරිවර්තන model එක පෙන්වයි.*
 
-Transcript pipeline එක අවංක වුණාට පස්සේ, පරිවර්තනය කියවන්න පුළුවන්
-වුණාට පස්සේ, app එකේ ඉතුරු ටික එකම data එකෙන්ම ගොඩනැගුණා. Chat
-සහායකයා ඔයා බලපු හැම දේකම transcripts වල ground වෙලා, ඒ නිසා උත්තර
-නිශ්චිත වීඩියෝවයි timestamp එකයි cite කරනවා. Notes ගත්ත මොහොතටම
-pin වෙනවා. උපසිරැසි rendering එකට සම්පූර්ණ VLC සැලකිල්ල ලැබුණා:
-size, පාට, background, position, fullscreen එකේදීත් ඒ ඔක්කොම වැඩ.
+## Grounded chat සහ ඉතිරි පද්ධතිය
 
-<img src="/images/blog/vidura/chat.png" alt="Vidura chat සහායකයා library එකට citations එක්ක උත්තර දෙනවා" />
+නිවැරදි, පරිවර්තිත transcripts ලැබුණු පසු ඉතිරි features එම data
+එකෙන්ම ව්‍යුත්පන්න වේ. Chat සහායකයා user ගේ library එකේ transcripts
+වල ground වී, වීඩියෝව සහ timestamp එක cite කරමින් උත්තර දෙයි.
+Notes playback positions වලට pin වේ. Subtitle rendering වලට size,
+පාට, background, position adjustments සහාය දක්වන අතර orientation
+දෙකේම fullscreen වලදී ක්‍රියාත්මක වේ. සම්පූර්ණ stack එක
+self-hosted: library, notes, chat history operator ගේ server එකේම
+පවතී.
 
-ඔක්කොම self-hosted. ඔයාගේ library එක, notes, chat history ඔයාගේම
-server එකේ. මට නම් ඒ කියන්නේ YouTube කෙළින්ම කතා කරන්න කැමති නැති
-ඒ ලාබ VPS එකමයි. ඒකේ ලස්සන සමමිතියක් තියෙනවා.
+<img src="/images/blog/vidura/chat.png" alt="Vidura chat සහායකයා library එකට citations සමඟ ප්‍රශ්නයකට උත්තර දෙයි" />
 
-## ආපහු ගියොත් මටම කියන දේවල්
+*රූපය 5: Library එකට citations සමඟ transcript-grounded chat.*
 
-පළමු දවසේම proxy එක ගන්න. ආචාරශීලී workarounds වලට මම ගත කළ රෑවල්
-proxy එකේ අවුරුද්දක ගාණට වඩා වටිනවා.
+## ඉදිරියට
 
-Model එකට ඔක්කොම යවන්න. LLM calls පොඩියට, ලාබෙට තියාගන්න ඕන කියන
-මගේ instinct එකෙන් ලැබුණේ වැඩි මුළු වියදමකට නරක පරිවර්තන.
+මෙම පද්ධතියෙන් engineering නිගමන තුනක්. YouTube මත රඳා පවතින
+infrastructure වලට residential egress මාර්ගයක් අවශ්‍යයි; ආචාරශීලී
+workarounds වැඩ නොකරන අතර proxy වියදම feature එකේ මිලයි.
+පරිවර්තන ගුණාත්මකභාවය model ප්‍රශ්නයකට පෙර context ප්‍රශ්නයකි;
+per-cue calls වලින් එක සම්පූර්ණ-transcript call එකකට මාරුවීම ඕනෑම
+model upgrade එකකට වඩා ප්‍රතිඵලය දියුණු කළා. Data provenance UI
+එකේ පෙන්වීම, මුලින් debugging අවශ්‍යතාවක් වුවත්, වීඩියෝවක
+උපසිරැසි කොතරම් විශ්වාස කළ යුතුද යන්න තීරණය කිරීමට users භාවිත
+කරන feature එක බවට පත් වුණා.
 
-UI එකට අවිනිශ්චිතකම පිළිගන්න ඉඩ දෙන්න. Provenance badges පටන්
-ගත්තේ debugging අවශ්‍යතාවයක් විදිහට, දැන් ඒක users වැඩිපුරම කතා
-කරන feature එක. මිනිස්සුන්ට perfect data ඕන නෑ, විශ්වාස කරන්න
-පුළුවන් data එක මොකක්ද කියලා දැනගන්න ඕන.
-
-Vidura open source, [Prabhava Labs](https://github.com/prabhavalabs/vidura)
-organization එක යටතේ. ඉංග්‍රීසි YouTube වලින් හුදු මුරණ්ඩුකමින්
-ඉගෙන ගන්න කෙනෙක්ව දන්නවා නම්, link එක එයාට යවන්න.
+Vidura open source ලෙස
+[Prabhava Labs](https://github.com/prabhavalabs/vidura) යටතේ ඇත.
+වත්මන් වැඩ domain terminology සඳහා per-video glossaries සහ course
+playlists සඳහා batch processing ඉලක්ක කරයි.
