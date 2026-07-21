@@ -1,98 +1,121 @@
 ---
-title: 'A stranger on Reddit had no attendance system, so I built one'
-description: 'The full story of Attendly: why a tuition class of 100+ students runs on Go and an embedded SQLite file, and why the door check-in app assumes the internet is already broken.'
+title: 'Attendly: an offline-first attendance system on a single Go binary'
+description: 'How a tuition class of 100+ students runs attendance, billing, and door check-in on one Go process with embedded SQLite, and why the mobile app treats offline as the primary state.'
 date: 2026-07-20
 tags: ['case-study', 'attendly', 'golang']
 lang: 'en'
 ---
 
-Some projects start with your own itch. This one started with somebody
-else's. A Reddit user described running a small tuition class and marking
-attendance on paper, when they marked it at all. No history, no way to
-settle a payment dispute, the whole operation held together by memory and
-goodwill. Commercial school software wants a school: per-student pricing,
-sales calls, features for a principal's office that a one-teacher class
-will never open.
-
-The gap annoyed me enough to build into it. Attendly is a complete
-management system for a tuition class, sized honestly for one: attendance,
-students, lecturers, timetables, billing, and notifications, open source
-and self-hosted on whatever cheap VPS you already have.
+Small tuition classes operate at an awkward scale: too many students to
+track on paper, too few to justify commercial school software with
+per-student pricing and features built for a principal's office. The gap
+became concrete when a Reddit user described running a class with no
+attendance system at all: paper lists, payment disputes with no records to
+resolve them. Attendly was built for exactly this operating point: a
+complete attendance, billing, and notification system for a class of 100+
+students, open source, self-hosted on a single low-cost VPS.
 
 <img src="/images/blog/attendly/admin-dashboard.png" alt="Attendly admin dashboard with attendance and revenue summaries" />
 
-## One binary, one file, one hundred students
+*Figure 1: The admin dashboard, running on the demo dataset of 172 students.*
 
-The backend is Go with SQLite embedded in the process. No database server,
-no connection pool, no second container to babysit. The whole persistent
-state of the class, students, sessions, invoices, payments, lives in one
-file on one disk that gets backed up like any other file.
+## Motivation
 
-On paper this sounds like a toy. In practice it is the opposite: for a
-hundred-and-something students, queries return in microseconds because
-there is no network between the application and its data. The demo seed
-for the screenshots in this post creates 172 students, four classes, and
-just under two thousand attendance records; every admin page loads before
-you finish blinking. The lesson I keep relearning: most systems are
-smaller than their architecture.
+Before writing any code, three constraints shaped the design:
 
-The Go process also carries everything that would traditionally sprawl
-into services: role-based access control, scheduled jobs for invoice
-generation, PDF receipts, and the notification pipeline. It deploys as a
-single Docker container behind nginx, with GitHub Actions SSHing in on
-every merge to main.
+- **One operator.** The person deploying this is a teacher, not an
+  infrastructure team. Every additional service is a liability.
+- **The classroom door.** Peak load is not requests per second; it is
+  eighty students arriving in a twenty-minute window, checked in by one
+  person standing at a door with unreliable connectivity.
+- **Money is the real dispute.** Attendance arguments in a tuition class
+  are usually payment arguments: who attended which month, who paid, who
+  is behind. Attendance without billing solves half the problem.
+
+These constraints ruled out the default architecture (managed database,
+separate services, cloud-only) before it was considered.
+
+## Architecture
+
+Attendly is a monorepo with three deployable pieces: a Go backend, a React
+admin portal, and an Expo mobile app for door check-in.
+
+The backend is a single Go process with SQLite embedded in-process. All
+business logic lives there: students, sessions, role-based access control,
+scheduled invoice generation, PDF receipts, and notifications. It deploys
+as one Docker container behind nginx and Cloudflare, and GitHub Actions
+redeploys it on every merge to main.
+
+Embedding the database was the defining decision. There is no database
+server, no connection pool, and no network hop between the application and
+its data, so queries return in microseconds. The entire persistent state
+of the class is one file on one disk; backing up the system is copying a
+file. For this workload the trade-off is favorable: SQLite's single-writer
+model is a real constraint, but a class of 100+ students produces write
+volumes far below the point where it matters. Most systems are smaller
+than their architecture.
 
 <img src="/images/blog/attendly/admin-students.png" alt="Student roster with per-student attendance and billing status" />
 
-## The door is the real interface
+*Figure 2: The roster view. Each row joins attendance history with billing status.*
 
-The admin portal is where the office work happens, but the system lives or
-dies at the classroom door on a Saturday morning, when eighty students
-arrive in twenty minutes.
+## The door check-in flow
 
-That flow got its own app: an Expo mobile client whose whole job is
-check-in. Students flash a QR card at the camera, or the person at the
-door searches a name. Present or late, one tap. The roster and counts
-update live as students stream in.
+The mobile app has one job: check students in at the door as fast as the
+queue moves. A student presents a QR card and the camera decodes it, or
+the operator searches a name. One tap marks present or late, and session
+counts update live.
+
+The controlling design decision is that offline is the primary state, not
+an error state. Classroom connectivity fails routinely, and a queue of
+students does not wait for a spinner. Check-ins are written to a local
+queue first and synced when connectivity allows. The UI reports sync state
+explicitly, with a manual sync control, so the operator always knows
+whether the server has caught up. On reconnect, the API reconciles queued
+marks against the scheduled session, opening it if check-ins arrive before
+the session was formally started.
 
 <img src="/images/blog/attendly/mobile-session.png" alt="Door check-in screen with QR scanning, manual lookup, and recent check-ins" />
 
-The design constraint that shaped it: the door cannot depend on the
-internet. Classroom wifi dies, mobile data hiccups, and a queue of
-students will not wait for a spinner. So the check-in app is offline
-first. Marks queue locally when the connection drops, a Sync now button
-shows exactly what state you are in, and the API reconciles everything
-once the network returns. The offline path is not an edge case in the
-code; it is the main path that sometimes happens to sync instantly.
+*Figure 3: The check-in screen: QR scanning, manual lookup, and sync status in one view.*
 
-<img src="/images/blog/attendly/admin-attendance.png" alt="Attendance overview in the admin portal" />
+## Billing as a first-class subsystem
 
-## Billing, because attendance is half the dispute
-
-The Reddit story that started this was really about money. Attendance
-arguments in a tuition class are usually payment arguments wearing a
-disguise: who attended which month, who paid for it, who is three months
-behind. So billing is not a bolt-on. Sessions feed invoices, invoices
-track payments and partial payments, and the defaulter view answers the
-awkward question before it becomes an awkward conversation. Receipts
-render as PDFs from the same Go process.
+Sessions feed invoices; invoices track full and partial payments; a
+defaulter view surfaces accounts in arrears before the conversation has to
+happen at the door. Receipts render as PDFs from the same Go process, and
+Cloudflare R2 stores uploads when configured. Keeping billing inside the
+attendance system, rather than bolted on, is what turns attendance records
+into evidence that settles disputes.
 
 <img src="/images/blog/attendly/admin-billing.png" alt="Billing view with paid, partial, and unpaid invoices" />
 
-## Open source, and actually runnable
+*Figure 4: Invoice states across the demo dataset: 182 paid, 84 partial, 78 unpaid.*
 
-The whole system is now public under
-[Prabhava Labs](https://github.com/prabhavalabs/attendly), MIT licensed.
-Before the release I audited the tree and the full git history with
-gitleaks: the only finding was a fabricated token in a PDF test fixture,
-which is the kind of false positive you frame and hang on the wall.
+## Results
 
-Running it yourself is deliberately boring: `make up`, `make backend`,
-`make seed`, and a demo seeder that fills the system with realistic fake
-students so you can explore every screen before trusting it with real
-ones. The admin portal runs at
-[attendly.prabhavalabs.com](https://attendly.prabhavalabs.com) and the
-mobile app builds with Expo for Android, or runs as a PWA.
+The demo seeder generates 172 students, four classes, 1,763 attendance
+records, and a full billing history; every admin page renders without
+perceptible latency on a shared 8-core VPS where Attendly's container
+holds about 4 MB of resident memory at idle. The production instance runs
+for a real class today, deployed automatically on merge.
 
-If you know a teacher still marking attendance on paper, this one is for
-them. It only exists because a stranger mentioned they had that problem.
+Before the open-source release, the working tree and all 102 commits of
+history were audited with gitleaks. The single finding was a fabricated
+token in a PDF test fixture; no real credential was ever committed.
+
+## Moving forward
+
+Two lessons from this build apply beyond it. First, sizing architecture to
+the actual workload, rather than to convention, removed entire categories
+of operational work: there is no database server to patch, monitor, or
+back up separately. Second, designing the mobile client around its worst
+network case produced a better experience in every case; the sync-state UI
+that exists for offline recovery turned out to be what operators check
+most.
+
+The system is MIT licensed at
+[prabhavalabs/attendly](https://github.com/prabhavalabs/attendly), with a
+five-minute local setup and the demo seeder used for every figure in this
+post. Planned next steps are NFC card support at the door and a
+parent-facing notification channel.

@@ -1,133 +1,127 @@
 ---
-title: 'Building Vidura: YouTube refused to talk to my server, and other adventures'
-description: 'The full story of building a Sinhala subtitle app for YouTube: blocked IPs, a residential proxy, one giant LLM call, and why the UI admits what it does not know.'
+title: 'Vidura: engineering frame-accurate Sinhala subtitles for YouTube'
+description: 'The transcript pipeline behind Vidura: why datacenter IPs cannot fetch YouTube captions, how a residential proxy and an ASR fallback fit together, and why translation happens in one structured-output call.'
 date: 2026-07-19
 tags: ['case-study', 'vidura', 'llm']
 lang: 'en'
 translationOf: 'building-vidura-si'
 ---
 
-The best math lecture I ever watched was a 40 minute YouTube video in
-English. My cousin, who is smarter than me, could not finish it. Not because
-of the math. Because of the English. Watching him rewind the same 30 seconds
-three times to parse a sentence made something click for me: the language
-barrier on educational YouTube is not an information problem, it is an
-endurance problem. You can survive it for one video. Nobody survives it for a
-whole course.
-
-YouTube's answer is auto-translated captions, and for Sinhala they are
-genuinely bad. Words translated one at a time, grammar from nowhere,
-technical terms mangled into poetry. Paid dubbing services skip Sinhala
-entirely. So I built [Vidura](https://vidura.prabhavalabs.com): a PWA where
-you paste a YouTube link and get the video back with synced Sinhala
-subtitles that read like something a person would say, plus an AI chat that
-has actually read the transcript.
+The best educational content on YouTube is overwhelmingly in English, and
+for Sinhala speakers that language barrier turns a 20-minute lesson into
+repeated rewinding. YouTube's auto-translated captions produce
+word-by-word output that is effectively unreadable in Sinhala, and
+commercial dubbing services do not cover the language.
+[Vidura](https://vidura.prabhavalabs.com) addresses this directly: a
+mobile-first PWA that fetches a video's transcript, translates it with an
+LLM, and overlays synchronized Sinhala subtitles on the embedded player,
+with a chat assistant grounded in the user's watch history. It is
+self-hosted, and the two hardest problems were getting the transcript and
+making the translation readable.
 
 <img src="/images/blog/vidura/watch.png" alt="Vidura's watch page: a YouTube video with Sinhala subtitles overlaid, provenance badges above the transcript" />
 
-This post is the story of the two problems that nearly killed it, and the
-slightly unglamorous engineering that saved it.
+*Figure 1: The watch page. Provenance badges above the transcript report where timestamps came from and which model translated them.*
 
-## Problem one: YouTube does not talk to servers
+## Motivation
 
-My first version was almost insulting in its simplicity. The server takes a
-video ID, fetches the caption track, translates it, done. It worked on my
-laptop on the first try. I deployed it to my VPS, pasted a link, and got
-nothing. Then I got nothing again, with error codes.
+The initial implementation was straightforward: fetch the caption track
+for a video ID, translate it, render it. It worked in local development
+and failed immediately in production. The difference was the network
+position of the server.
 
-Here is the thing nobody tells you until you are inside it: YouTube treats
-requests from datacenter IP ranges as bots, because they usually are. My
-cheap VPS lives in exactly such a range. The same request that sailed
-through from my home connection got a bot check from the server. No caption
-track for you.
+YouTube applies bot detection to requests from datacenter IP ranges, and a
+low-cost VPS sits squarely inside them. The same request that succeeded
+from a residential connection received a bot challenge from the server.
+Rotating user agents, backoff, and cookie persistence did not change the
+outcome, and structurally could not: from YouTube's perspective, a
+datacenter server requesting caption tracks is indistinguishable from a
+scraper.
+
+## The transcript pipeline
 
 <img src="/images/blog/vidura/diagram-transcript.svg" alt="Diagram: direct requests from the VPS get blocked, yt-dlp through a residential proxy reaches the caption track, Gemini audio transcription is the fallback" />
 
-I tried the polite options first. Rotating user agents, backing off, cookie
-jars. None of it mattered, and honestly it should not: from YouTube's side,
-my server looks identical to a scraper farm. The fix that finally held was
-boring and it costs money: route yt-dlp through a paid residential proxy.
-The request now exits through an IP that belongs to some household ISP, and
-YouTube serves the caption track like nothing ever happened.
+*Figure 2: Transcript acquisition. The primary path uses YouTube's own caption track; audio transcription is the fallback.*
 
-Why fight so hard for the official captions instead of just transcribing
-the audio? Timestamps. YouTube's own caption track is accurate to the frame.
-Audio transcription, which Vidura does fall back to when there is no proxy
-or no captions, lands within about three seconds. Three seconds is the
-difference between subtitles and a karaoke machine that is slightly haunted.
+The production pipeline has two paths, ordered by timestamp quality:
 
-That fallback created a design decision I am weirdly proud of: every video
-in Vidura wears a provenance badge. It tells you whether the timestamps came
-from YouTube captions or from audio transcription, shows a computed sync
-score, and names the model that translated it. When the data is second rate,
-the UI says so. More apps should admit things.
+- **Primary: yt-dlp through a paid residential proxy.** The request exits
+  through a household ISP address and YouTube serves the caption track
+  normally. This path is preferred because YouTube's own captions carry
+  frame-accurate timestamps.
+- **Fallback: audio transcription with Gemini.** When no proxy is
+  configured or a video has no caption track, Vidura transcribes the
+  audio. Timestamps from ASR land within roughly three seconds, which is
+  adequate for following a lecture but visibly worse for subtitle sync.
 
-## Problem two: translation that does not sound like a robot
+The quality difference between the two paths motivated a product
+decision: every video carries a provenance badge stating whether its
+timestamps came from YouTube captions or from transcription, alongside a
+computed sync score and the name of the translating model. When the data
+is lower fidelity, the interface says so rather than presenting both
+paths as equivalent.
 
-The obvious way to translate a caption track is line by line. Loop over the
-cues, send each one to a model, write down the answers. I built that first,
-and the output was fascinating garbage. Each line was defensible on its own.
-Read together, the word "function" became three different Sinhala words in
-one lecture, sentences snapped in half at cue boundaries, and pronouns
-pointed at people who were never introduced.
+## Translation as a single structured-output call
 
-The problem is context. A caption cue is not a sentence, it is wherever the
-speaker happened to pause. Translating cues independently means translating
-with amnesia.
+The first translation implementation iterated over caption cues and
+translated each independently. Output quality was poor in a specific,
+diagnosable way: terminology drifted (one English term became three
+different Sinhala words across a lecture), sentences broke at cue
+boundaries, and pronouns lost their referents. The root cause is that a
+caption cue is not a sentence; it is wherever the speaker paused.
+Translating cues independently is translating without context.
 
 <img src="/images/blog/vidura/diagram-translate.svg" alt="Diagram: translating caption lines independently causes drift; Vidura sends the entire transcript in one structured-output call" />
 
-So Vidura does the opposite: one structured-output call with the entire
-transcript, plus the video title and description for grounding. The model
-sees the whole lecture before it translates a single line, which is how a
-human translator would work. Terminology stays consistent from minute 2 to
-minute 40, and sentences flow across cue boundaries because the model knows
-where the thought actually ends.
+*Figure 3: Cue-by-cue translation versus whole-transcript translation.*
 
-Two guardrails make this safe. The core prompt is immutable, so a user's
-custom tone settings cannot accidentally break the output format. And an
-alignment gate checks the result against the source cues; a translation
-that drifts from its timestamps gets caught before anyone sees it.
+The production design inverts this: one structured-output call containing
+the entire transcript plus the video title and description for grounding.
+The model sees the full lecture before translating any line, so
+terminology stays consistent from minute 2 to minute 40 and sentences flow
+across cue boundaries. Two guardrails keep this safe. The core prompt is
+immutable, so user-configurable tone settings cannot corrupt the output
+format, and an alignment gate validates the result against the source cues
+before anything is stored.
 
-This is also where [OpenRouter](https://openrouter.ai) earned its place.
-Whole-transcript calls are large, and a 40 minute lecture is a lot of
-tokens. Through OpenRouter I can point the same code at DeepSeek when I
-want the price of a translation to round to zero, or at GPT when a video
-deserves the fancy treatment, without touching the integration. Switching
-models is a settings change, not a deploy. When you are one person paying
-for your own infrastructure, that flexibility is the difference between an
-experiment you keep running and one you quietly turn off.
+Whole-transcript calls are large, which made model routing an economic
+requirement rather than a convenience. Vidura calls models through
+OpenRouter: DeepSeek for near-zero marginal cost, GPT-class models when a
+video warrants it. Switching is a settings change, not a code change. For
+a self-funded system, that flexibility is what keeps the feature
+economically viable.
 
 <img src="/images/blog/vidura/library.png" alt="Vidura's library page showing processed videos with their sync scores" />
 
-## The parts that came free
+*Figure 4: The library. Each processed video displays its sync score and translation model.*
 
-Once the transcript pipeline was honest and the translation was readable,
-the rest of the app fell out of the same data. The chat assistant is
-grounded in the transcripts of everything you have watched, so answers cite
-the exact video and timestamp. Notes pin to the moment you took them.
-Subtitle rendering got the full VLC treatment: size, colour, background,
-position, all respected in fullscreen.
+## Grounded chat and the rest of the system
+
+With accurate, translated transcripts in place, the remaining features
+derive from the same data. The chat assistant answers questions grounded
+in the transcripts of the user's library, citing video and timestamp.
+Notes pin to playback positions. Subtitle rendering supports size, color,
+background, and position adjustments, applied in fullscreen on both
+orientations. The full stack is self-hosted: library, notes, and chat
+history stay on the operator's server.
 
 <img src="/images/blog/vidura/chat.png" alt="Vidura's chat assistant answering a question with citations into the video library" />
 
-Everything is self-hosted. Your library, your notes, and your chat history
-live on your own server, which for me is the same cheap VPS that YouTube
-refuses to speak to directly. There is a pleasing symmetry in that.
+*Figure 5: Transcript-grounded chat with citations into the library.*
 
-## What I would tell past me
+## Moving forward
 
-Buy the proxy on day one. I spent more evenings on polite workarounds than
-the proxy costs in a year.
+Three engineering conclusions from this system. Infrastructure that
+depends on YouTube requires a residential egress path; the polite
+workarounds do not work and the proxy cost is the price of the feature.
+Translation quality is a context problem before it is a model problem;
+moving from per-cue calls to one whole-transcript call improved output
+more than any model upgrade. And surfacing data provenance in the UI,
+originally a debugging aid, became the feature users rely on to decide
+how much to trust a video's subtitles.
 
-Send the model everything. My instinct was to keep LLM calls small and
-cheap, and it produced worse translations at higher total cost than one
-well-grounded large call.
-
-Let the UI admit uncertainty. The provenance badges started as a debugging
-aid and became the feature users mention most. People do not need perfect
-data, they need to know which data to trust.
-
-Vidura is open source under the [Prabhava Labs](https://github.com/prabhavalabs/vidura)
-organisation. If you know someone learning from English YouTube through
-sheer stubbornness, send them a link.
+Vidura is open source under
+[Prabhava Labs](https://github.com/prabhavalabs/vidura). Current work
+targets per-video glossaries for domain terminology and batch processing
+for course playlists.
